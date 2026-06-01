@@ -1,0 +1,315 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.card-toggle {
+  margin-top: 12px;
+}
+
+.swal2-container {
+  z-index: 99999 !important;
+}
+
+/* Loading 
+--------------------------------------------------------------------------------------------------------*/
+.loading {
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+.cssload-spin-box {
+  position: absolute;
+  margin: auto;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 100%;
+  box-shadow: 15px 15px #fff, -15px 15px rgb(212, 119, 111), -15px -15px #fff,
+    15px -15px #a9a9a9;
+  -o-box-shadow: 15px 15px #fff, -15px 15px rgb(212, 119, 111), -15px -15px #fff,
+    15px -15px #a9a9a9;
+  -ms-box-shadow: 15px 15px #fff, -15px 15px rgb(212, 119, 111),
+    -15px -15px #fff, 15px -15px #a9a9a9;
+  -webkit-box-shadow: 15px 15px #fff, -15px 15px rgb(212, 119, 111),
+    -15px -15px #fff, 15px -15px #a9a9a9;
+  -moz-box-shadow: 15px 15px #fff, -15px 15px rgb(212, 119, 111),
+    -15px -15px #fff, 15px -15px #0a19ff;
+  animation: cssload-spin ease infinite 4.6s;
+  -o-animation: cssload-spin ease infinite 4.6s;
+  -ms-animation: cssload-spin ease infinite 4.6s;
+  -webkit-animation: cssload-spin ease infinite 4.6s;
+  -moz-animation: cssload-spin ease infinite 4.6s;
+}
+@keyframes cssload-spin {
+  0%,
+  100% {
+    box-shadow: 15px 15px #fff, -15px 15px #a9a9a9, -15px -15px #fff,
+      15px -15px #fff;
+  }
+  25% {
+    box-shadow: -15px 15px #fff, -15px -15px #fff, 15px -15px #fff,
+      15px 15px #fff;
+  }
+  50% {
+    box-shadow: -15px -15px #fff, 15px -15px #fff, 15px 15px #fff,
+      -15px 15px #fff;
+  }
+  75% {
+    box-shadow: 15px -15px #fff, 15px 15px #fff, -15px 15px #fff,
+      -15px -15px #fff;
+  }
+}
+@-ms-keyframes cssload-spin {
+  0%,
+  100% {
+    box-shadow: 15px 15px #a9a9a9, -15px 15px #a9a9a9, -15px -15px #a9a9a9,
+      15px -15px #a9a9a9;
+  }
+  25% {
+    box-shadow: -15px 15px #a9a9a9, -15px -15px #fff, 15px -15px #a9a9a9,
+      15px 15px #fff;
+  }
+  50% {
+    box-shadow: -15px -15px #fff, 15px -15px #a9a9a9, 15px 15px #fff,
+      -15px 15px #a9a9a9;
+  }
+  75% {
+    box-shadow: 15px -15px #fff, 15px 15px #fff, -15px 15px #fff,
+      -15px -15px #fff;
+  }
+}
+@-webkit-keyframes cssload-spin {
+  0%,
+  100% {
+    box-shadow: 15px 15px #fff, -15px 15px #a9a9a9, -15px -15px #fff,
+      15px -15px #a9a9a9;
+  }
+  25% {
+    box-shadow: -15px 15px #a9a9a9, -15px -15px #fff, 15px -15px #a9a9a9,
+      15px 15px #fff;
+  }
+  50% {
+    box-shadow: -15px -15px #fff, 15px -15px #a9a9a9, 15px 15px #fff,
+      -15px 15px #a9a9a9;
+  }
+  75% {
+    box-shadow: 15px -15px #fff, 15px 15px #fff, -15px 15px #fff,
+      -15px -15px #fff;
+  }
+}
+@-moz-keyframes cssload-spin {
+  0%,
+  100% {
+    box-shadow: 15px 15px #fff, -15px 15px #a9a9a9, -15px -15px #fff,
+      15px -15px #a9a9a9;
+  }
+  25% {
+    box-shadow: -15px 15px #a9a9a9, -15px -15px #fff, 15px -15px #a9a9a9,
+      15px 15px #fff;
+  }
+  50% {
+    box-shadow: -15px -15px #fff, 15px -15px #a9a9a9, 15px 15px #fff,
+      -15px 15px #a9a9a9;
+  }
+  75% {
+    box-shadow: 15px -15px #fff, 15px 15px #fff, -15px 15px #fff,
+      -15px -15px #fff;
+  }
+}
+
+/* loading-peeek
+--------------------------------------------------------------------------------------------------------*/
+
+.peeek-loading {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+}
+.peeek-loading ul {
+  position: absolute;
+  left: calc(50% - 0.7em);
+  top: calc(50% - 4.2em);
+  display: inline-block;
+  text-indent: 2.8em;
+}
+.peeek-loading ul li:after,
+.peeek-loading ul:after {
+  width: 1em;
+  height: 1em;
+  background-color: #fff;
+  border-radius: 100%;
+}
+.peeek-loading ul li:after,
+.peeek-loading ul:after {
+  content: "";
+  display: block;
+}
+.peeek-loading ul:after {
+  position: absolute;
+  top: 2.8em;
+}
+.peeek-loading li {
+  position: absolute;
+  padding-bottom: 5.6em;
+  top: 0;
+  left: 0;
+}
+.peeek-loading li:nth-child(1) {
+  transform: rotate(0deg);
+  animation-delay: 0.125s;
+}
+.peeek-loading li:nth-child(1):after {
+  animation-delay: 0.125s;
+}
+.peeek-loading li:nth-child(2) {
+  transform: rotate(36deg);
+  animation-delay: 0.25s;
+}
+.peeek-loading li:nth-child(2):after {
+  animation-delay: 0.25s;
+}
+.peeek-loading li:nth-child(3) {
+  transform: rotate(72deg);
+  animation-delay: 0.375s;
+}
+.peeek-loading li:nth-child(3):after {
+  animation-delay: 0.375s;
+}
+.peeek-loading li:nth-child(4) {
+  transform: rotate(108deg);
+  animation-delay: 0.5s;
+}
+.peeek-loading li:nth-child(4):after {
+  animation-delay: 0.5s;
+}
+.peeek-loading li:nth-child(5) {
+  transform: rotate(144deg);
+  animation-delay: 0.625s;
+}
+.peeek-loading li:nth-child(5):after {
+  animation-delay: 0.625s;
+}
+.peeek-loading li:nth-child(6) {
+  transform: rotate(180deg);
+  animation-delay: 0.75s;
+}
+.peeek-loading li:nth-child(6):after {
+  animation-delay: 0.75s;
+}
+.peeek-loading li:nth-child(7) {
+  transform: rotate(216deg);
+  animation-delay: 0.875s;
+}
+.peeek-loading li:nth-child(7):after {
+  animation-delay: 0.875s;
+}
+.peeek-loading li:nth-child(8) {
+  transform: rotate(252deg);
+  animation-delay: 1s;
+}
+.peeek-loading li:nth-child(8):after {
+  animation-delay: 1s;
+}
+.peeek-loading li:nth-child(9) {
+  transform: rotate(288deg);
+  animation-delay: 1.125s;
+}
+.peeek-loading li:nth-child(9):after {
+  animation-delay: 1.125s;
+}
+.peeek-loading li:nth-child(10) {
+  transform: rotate(324deg);
+  animation-delay: 1.25s;
+}
+.peeek-loading li:nth-child(10):after {
+  animation-delay: 1.25s;
+}
+.peeek-loading li {
+  animation: dotAnimation 2.5s infinite;
+}
+@keyframes dotAnimation {
+  0%,
+  55%,
+  100% {
+    padding: 0 0 5.6em 0;
+  }
+  5%,
+  50% {
+    padding: 2.8em 0;
+  }
+}
+.peeek-loading li:after {
+  animation: dotAnimationTwo 2.5s infinite;
+}
+@-webkit-keyframes dotAnimationTwo {
+  0%,
+  55%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  5%,
+  50% {
+    opacity: 0.5;
+    transform: scale(0.5);
+  }
+}
+
+.spinner-disable {
+  display: none;
+}
+
+.hide{
+display: none !important;
+}
+
+.show{
+  display: block !important;
+}

@@ -1,0 +1,222 @@
+import React from "react";
+import Button from "@mui/material/Button";
+import {
+  add_rounded,
+  delete_ic,
+  down_arrow_icon,
+  edit_ic,
+} from "../../../assets/images";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputBase,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import DesignerHeader from "../Component/header";
+import DesignerSidebar from "../Component/sidebar";
+
+const rows = [
+  {
+    EmployeeID: "01",
+    EmployeeName: " ",
+    Role: " ",
+    Phone: " ",
+    Extension: " ",
+    Exponent: "-",
+  },
+  {
+    EmployeeID: "02",
+    EmployeeName: " ",
+    Role: " ",
+    Phone: " ",
+    Extension: " ",
+    Exponent: "-",
+  },
+  {
+    EmployeeID: "03",
+    EmployeeName: " ",
+    Role: " ",
+    Phone: " ",
+    Extension: " ",
+    Exponent: "-",
+  },
+];
+
+function DesignerEmployees() {
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const [selectVal, setSelectVal] = React.useState("");
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setSelectVal(event.target.value);
+  };
+
+  return (
+    <>
+      <div className="wrapper">
+        <DesignerHeader />
+        <DesignerSidebar />
+        <main className="main-content">
+          <div className="main-card">
+            <div className="title-block">
+              <div className="left-block">
+                <Typography variant={"h2"}>Employees</Typography>
+                <p className="pb-0">List of Institution Employees</p>
+              </div>
+              <div className="right-block">
+                <Button
+                  variant="contained"
+                  disableElevation
+                  className="btn-light"
+                  endIcon={<img src={add_rounded} alt="add" />}
+                  onClick={handleClickOpen}
+                >
+                  Add Employee
+                </Button>
+              </div>
+            </div>
+            <TableContainer>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Employee ID</TableCell>
+                    <TableCell>Employee Name</TableCell>
+                    <TableCell>Role</TableCell>
+                    <TableCell>Phone</TableCell>
+                    <TableCell>Extension</TableCell>
+                    <TableCell align="center" width="190px">
+                      Actions
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{row.EmployeeID}</TableCell>
+                      <TableCell>{row.EmployeeName}</TableCell>
+                      <TableCell>{row.Role}</TableCell>
+                      <TableCell>{row.Phone}</TableCell>
+                      <TableCell>{row.Extension}</TableCell>
+                      <TableCell align="center" width="190px">
+                        <div className="action btns-block">
+                          <Switch className="custom" />
+                          <IconButton className="border-icon-btn no-border sm">
+                            <img src={edit_ic} alt="mail" />
+                          </IconButton>
+                          <IconButton className="border-icon-btn no-border sm">
+                            <img src={delete_ic} alt="mail" />
+                          </IconButton>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+        </main>
+        <Dialog open={open} onClose={handleClose} className="c-dialog">
+          <DialogTitle component={"div"}>
+            <div className="title-block mb-0">
+              <div className="left-block mb-0">
+                <Typography variant={"h2"}>Employee Definition</Typography>
+                <p className="pb-0">Add or Update an Employee</p>
+              </div>
+            </div>
+          </DialogTitle>
+          <DialogContent>
+            <div className="inner-card mb-0">
+              <Grid spacing={3} container>
+                <Grid item xs={12} sm={6}>
+                  <div className="input-with-label">
+                    <label className="lg">Role</label>
+                    <FormControl fullWidth>
+                      <Select
+                        value={selectVal}
+                        onChange={handleChange}
+                        displayEmpty
+                        inputProps={{ "aria-label": "Without label" }}
+                        IconComponent={() => (
+                          <img src={down_arrow_icon} alt="" />
+                        )}
+                      >
+                        <MenuItem value="">
+                          <em>Select</em>
+                        </MenuItem>
+                        <MenuItem value={10}>Select 1</MenuItem>
+                        <MenuItem value={20}>Select 2</MenuItem>
+                        <MenuItem value={30}>Select 3</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                <div className="input-with-label">
+                    <label className="lg">Phone</label>
+                    <FormControl fullWidth>
+                      <InputBase placeholder="Write your Number" fullWidth />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <div className="input-with-label">
+                    <label className="lg">Employee Name</label>
+                    <FormControl fullWidth>
+                      <InputBase placeholder="Write your name" fullWidth />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <div className="input-with-label">
+                    <label className="lg">Extension</label>
+                    <FormControl fullWidth>
+                      <InputBase placeholder="Write your ext" fullWidth />
+                    </FormControl>
+                  </div>
+                </Grid>
+              </Grid>
+            </div>
+          </DialogContent>
+          <DialogActions className="btns-block right">
+            <Button
+              disableElevation
+              variant="contained"
+              color="secondary"
+              className="sm"
+              onClick={handleClose}
+            >
+              Cancel
+            </Button>
+            <Button disableElevation variant="contained">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </>
+  );
+}
+
+export default DesignerEmployees;
