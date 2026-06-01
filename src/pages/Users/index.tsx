@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Button from "@mui/material/Button";
 import {
   add_rounded,
@@ -35,19 +35,19 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import {
+  ConfigurationActivities,
   Errors,
   StatusCode,
   rowsPerPageOptionsConst,
-  ROLE_ACTIVITY,
 } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { visuallyHidden } from "@mui/utils";
 import { Institution } from "../../models/configuration/InstitutionModel";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import { UserModel } from "../../models/security/UserModel";
 import { UserService } from "../../services/security/user-service";
-import { RoleMainModel } from "../../models/security/RoleModel";
-import { AssignRoles, selectedInst, userStr } from "../../services/request";
+import { userStr } from "../../services/request";
 
 function Users() {
   const navigate = useNavigate();
@@ -58,19 +58,14 @@ function Users() {
   const [selectInstitutionVal, setSelectInstitutionVal] = React.useState("");
   const [institution, setInstitution] = useState<Institution[]>([]);
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
   //const [loginUser, setLoginUser] = React.useState<any>();
   const intl = useIntl();
 
-  useEffect(() => {
-    const assignRole = AssignRoles.find(
-      (role: RoleMainModel) => role.instId === selectedInst
-    );
-    //console.log("get role activity", assignRole);
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
-  }, [selectedInst]);
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNGUSERS), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
 
   /* START (sort table data) */
   function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -378,18 +373,7 @@ function Users() {
                       state: { institutionId: selectInstitutionVal },
                     })
                   }
-                  disabled={
-                    !(
-                      roleActivity?.roleActivities.find(
-                        (act) =>
-                          act.activity?.activityDesc === ROLE_ACTIVITY.Users
-                      ) &&
-                      roleActivity?.roleActivities.find(
-                        (act) =>
-                          act.activity?.activityDesc === ROLE_ACTIVITY.Users
-                      )?.accessAdd === "1"
-                    )
-                  }
+                  disabled={!canAdd}
                 >
                   <FormattedMessage
                     id="Users.adduser"
@@ -523,41 +507,13 @@ function Users() {
                               onChange={(e) =>
                                 changeStatus(row.userId as number, e)
                               }
-                              disabled={
-                                row?.status === "3" || (
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  )?.accessUpdate === "1"
-                                 ))
-                              }
+                              disabled={row?.status === "3" || !canUpdate}
                             />
                             <IconButton
                               title="edit"
                               className={`border-icon-btn no-border sm ${row.status==="3"?"darker":""}`}
                               onClick={() => editUser(row.userId as number)}
-                              disabled={
-                                row?.status === "3" ||(
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  )?.accessUpdate === "1"
-                                )
-                              )}
+                              disabled={row?.status === "3" || !canUpdate}
                             >
                               <img src={edit_ic} alt="edit" />
                             </IconButton>
@@ -567,21 +523,7 @@ function Users() {
                               onClick={(e) =>
                                 resetPassword(row.username as string, e)
                               }
-                              disabled={
-                                row?.status === "3" ||(
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  )?.accessUpdate === "1"
-                                )
-                              )}
+                              disabled={row?.status === "3" || !canUpdate}
                             >
                               <img src={resetIcon} alt="edit" />
                             </IconButton>
@@ -589,22 +531,7 @@ function Users() {
                               className={`border-icon-btn no-border sm ${row.status!=="3"?'darker':''}` }
                               title="unblock"
                               onClick={() => unblockUser(row.userId as number)}
-                              disabled={
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  )?.accessUpdate === "1"
-                                  &&
-                                  row.status === "3" 
-                                )
-                              }
+                              disabled={!(canUpdate && row.status === "3")}
                             >
                             <img src={unblockUserIcon} alt="unblock" />
                             </IconButton>
@@ -612,20 +539,7 @@ function Users() {
                               title="delete"
                               className="border-icon-btn no-border sm"
                               onClick={() => onDelete(row.userId as number)}
-                              disabled={
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Users
-                                  )?.accessDelete === "1"
-                                )
-                              }
+                              disabled={!canDelete}
                             >
                               <img src={delete_ic} alt="delete" />
                             </IconButton>

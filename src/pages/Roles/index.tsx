@@ -1,5 +1,5 @@
 import { Box, Button, FormControl, IconButton, InputAdornment, InputBase, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel, Typography } from '@mui/material';
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
@@ -7,9 +7,9 @@ import Swal from 'sweetalert2';
 import { add_rounded, delete_ic, edit_ic, search_ic } from '../../assets/images';
 import { RoleMainModel, RoleModel } from '../../models/security/RoleModel';
 import { RoleService } from '../../services/security/role-service';
-import { Errors, ROLE_ACTIVITY, rowsPerPageOptionsConst, StatusCode } from '../../utils/constant';
+import { ConfigurationActivities, Errors, rowsPerPageOptionsConst, StatusCode } from '../../utils/constant';
 import { visuallyHidden } from "@mui/utils";
-import { AssignRoles, selectedInst } from '../../services/request';
+import { getActivityPermissions } from '../../utils/permissionUtils';
 import { getLocalStorage, LOCALSTORAGE_KEYS } from '../../utils/helper';
 
 const Roles = () => {
@@ -18,20 +18,17 @@ const Roles = () => {
     const [roleList, setRoleList] = React.useState<RoleMainModel[]>([]);
     const [filteredRoleList, setFilteredRoleList] = React.useState<RoleMainModel[]>([]);
     const [searchTerm, setSearchTerm] = React.useState("");
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
+
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNGROLES), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
 
     const userStr = getLocalStorage(LOCALSTORAGE_KEYS.USER);
     const userdata = JSON.parse(
         userStr as string
     );
-
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
-
 
     /* START (sort table data) */
     function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -244,7 +241,7 @@ const Roles = () => {
                                     className="btn-light"
                                     endIcon={<img src={add_rounded} alt="add" />}
                                     onClick={() => navigate("/roles-definition")}
-                                    disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Roles) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Roles)?.accessAdd === "1")}
+                                    disabled={!canAdd}
                                 >
                                     <FormattedMessage
                                         id="Roles.addrole"
@@ -300,19 +297,19 @@ const Roles = () => {
                                                             onChange={(e) =>
                                                                 changeStatus(row.roleId, e)
                                                             }
-                                                            disabled={row.isSystemAdminRole|| !(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Roles) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Roles)?.accessUpdate === "1")}
+                                                            disabled={row.isSystemAdminRole || !canUpdate}
                                                         />
                                                         <IconButton
                                                             className="border-icon-btn no-border sm"
                                                             onClick={() => editRole(row.roleId)}
-                                                            disabled={row.isSystemAdminRole || !(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Roles) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Roles)?.accessUpdate === "1")}
+                                                            disabled={row.isSystemAdminRole || !canUpdate}
                                                         >
                                                             <img src={edit_ic} alt="edit" />
                                                         </IconButton>
                                                         <IconButton
                                                             className="border-icon-btn no-border sm"
                                                             onClick={() => onDelete(row.roleId)}
-                                                            disabled={row.isSystemAdminRole || !(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Roles) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Roles)?.accessDelete === "1")}
+                                                            disabled={row.isSystemAdminRole || !canDelete}
                                                         >
                                                             <img src={delete_ic} alt="delete" />
                                                         </IconButton>

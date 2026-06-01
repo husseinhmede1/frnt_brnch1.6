@@ -30,12 +30,8 @@ import { RootState } from "../../feature/store";
 import { CustomeComparator, getValues } from "../../utils/commonfunction";
 import { APiService } from "../../services/services/api-service";
 import { APIListModel, ApiModel } from "../../models/configuration/ScopeModel";
-import {
-  ConfigurationActivities,
-  ModuleDescription,
-  StatusCode,
-  rowsPerPageOptions,
-} from "../../utils/constant";
+import { ConfigurationActivities, StatusCode, rowsPerPageOptions } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { FormattedMessage, useIntl } from "react-intl";
 
 const ArrowDown = () => (
@@ -60,6 +56,13 @@ function DesignerMakerCheckerConfiguration() {
   const position = useSelector((state: RootState) => state.selectedCard.position);
   const { left, top } = position;
 
+  // Permissions from modules localStorage (same pattern as XCS)
+  const perms = useMemo(
+    () => getActivityPermissions(ConfigurationActivities.MAKER_CHECKER),
+    []
+  );
+  const canUpdate = perms.accessUpdate === "1";
+
   const handleChangePage = useCallback((_: unknown, newPage: number) => {
     setPage(newPage);
   }, []);
@@ -72,37 +75,31 @@ function DesignerMakerCheckerConfiguration() {
     []
   );
 
-  const showApiErrors = useCallback(
-    (error: any, fallbackMessage: string) => {
-      const errors = error?.response?.data?.errors;
-      if (Array.isArray(errors) && errors.length > 0) {
-        errors.forEach((message: string) => toast.error(message));
-      } else {
-        toast.error(fallbackMessage);
-      }
-    },
-    []
-  );
+  const showApiErrors = useCallback((error: any, fallbackMessage: string) => {
+    const errors = error?.response?.data?.errors;
+    if (Array.isArray(errors) && errors.length > 0) {
+      errors.forEach((message: string) => toast.error(message));
+    } else {
+      toast.error(fallbackMessage);
+    }
+  }, []);
 
+  // Stable fetch — page/rowsPerPage passed as params, not captured via closure
   const fetchApiList = useCallback(
-    async (objectName = "", resetPage = false) => {
+    async (objectName: string, currentPage: number, currentRowsPerPage: number) => {
       const payload = {
         asc: objectName ? "true" : true,
-        offset: resetPage ? 0 : page,
-        pageSize: rowsPerPage,
+        offset: currentPage,
+        pageSize: currentRowsPerPage,
         sortBy: "apiDesc",
       };
 
       try {
-        console.log("Fetching API list with payload:", payload, "and objectName:", objectName);
         const response = objectName
           ? await APiService.getApiList(payload, objectName)
           : await APiService.getAllApiList(payload);
 
-        const apiResponse = response.data?.apiResponseDto ?? [];
-        const filteredResponse = apiResponse;
-
-        setRowData(filteredResponse);
+        setRowData(response.data?.apiResponseDto ?? []);
         setTotalNumRecords(
           response.data?.paginationResponseDto?.totalNumberOfRecords ?? 0
         );
@@ -118,7 +115,7 @@ function DesignerMakerCheckerConfiguration() {
         setTotalNumRecords(0);
       }
     },
-    [page, rowsPerPage, intl, showApiErrors]
+    [intl, showApiErrors]
   );
 
   const loadObjectNames = useCallback(async () => {
@@ -135,11 +132,27 @@ function DesignerMakerCheckerConfiguration() {
     }
   }, [intl]);
 
+  // Single data-loading effect — fires on mount and whenever page/rows/object change
+  useEffect(() => {
+    fetchApiList(selectedObject, page, rowsPerPage);
+  }, [page, rowsPerPage, selectedObject, fetchApiList]);
+
+  // Load object names once on mount
+  useEffect(() => {
+    loadObjectNames();
+  }, [loadObjectNames]);
+
+  useEffect(() => {
+    if (rowData.length === 0) {
+      gridRef.current?.api?.showNoRowsOverlay();
+    }
+  }, [rowData]);
+
   const updateStpFlag = useCallback(
     async (data: APIListModel) => {
       const payload = [
         {
-          apiId: data.apiId as number,
+          apiId: data.apiId,
           stp: data.stp === "1" ? "0" : "1",
         },
       ];
@@ -153,56 +166,31 @@ function DesignerMakerCheckerConfiguration() {
               defaultMessage: "STP flag updated successfully",
             })
           );
-          fetchApiList(selectedObject);
+          fetchApiList(selectedObject, page, rowsPerPage);
         }
       } catch (error) {
         showApiErrors(error, "Failed to update STP flag");
       }
     },
-    [fetchApiList, intl, selectedObject, showApiErrors]
+    [fetchApiList, intl, selectedObject, page, rowsPerPage, showApiErrors]
   );
 
-  useEffect(() => {
-    loadObjectNames();
-    console.log("Selected Object on load:", selectedObject);
-    fetchApiList(selectedObject, true);
-  }, [fetchApiList, loadObjectNames]);
-
-  useEffect(() => {
-    if (page > 0 || rowsPerPage !== 25) {
-      console.log("Selected Object on load1:", selectedObject);
-      fetchApiList(selectedObject);
-    }
-  }, [page, rowsPerPage, selectedObject, fetchApiList]);
-
-  useEffect(() => {
-    if (rowData.length === 0) {
-      gridRef.current?.api?.showNoRowsOverlay();
-    }
-  }, [rowData]);
-
-  const handleObject = useCallback(
-    (event: SelectChangeEvent<string>) => {
-      const objectName = event.target.value;
-      setPage(0);
-      setSelectedObject(objectName);
-      console.log("Selected Object on load2:", objectName);
-      fetchApiList(objectName, true);
-    },
-    [fetchApiList]
-  );
+  // Just update state — the data-loading effect re-runs automatically
+  const handleObject = useCallback((event: SelectChangeEvent<string>) => {
+    setPage(0);
+    setSelectedObject(event.target.value);
+  }, []);
 
   const handleClearSelection = useCallback(() => {
     setSelectedObject("");
     setPage(0);
-    console.log("Selected Object on load3:", selectedObject);
-    fetchApiList("", true);
-  }, [fetchApiList]);
+  }, []);
 
   const sortedObjectNames = useMemo(
-    () => [...objectNameList].sort((a, b) =>
-      CustomeComparator(a.objectName, b.objectName)
-    ),
+    () =>
+      [...objectNameList].sort((a, b) =>
+        CustomeComparator(a.objectName, b.objectName)
+      ),
     [objectNameList]
   );
 
@@ -265,6 +253,7 @@ function DesignerMakerCheckerConfiguration() {
               <Checkbox
                 checked={params.data?.stp === "1"}
                 onChange={() => updateStpFlag(params.data)}
+                disabled={!canUpdate}
                 icon={<img src={check_rounded} alt="" />}
                 checkedIcon={<img src={ic_checked} alt="" />}
               />
@@ -273,15 +262,10 @@ function DesignerMakerCheckerConfiguration() {
         ),
       },
     ],
-    [intl, updateStpFlag]
+    [intl, updateStpFlag, canUpdate]
   );
 
-  const defaultColDef = useMemo(
-    () => ({ resizable: true }),
-    []
-  );
-
-  const suppressRowHoverHighlight = false;
+  const defaultColDef = useMemo(() => ({ resizable: true }), []);
 
   return (
     <>
@@ -299,7 +283,6 @@ function DesignerMakerCheckerConfiguration() {
                 defaultMessage: "Manage Maker-checker configuration",
               })}
               titleTypographyProps={{ variant: "h2", component: "h2" }}
-            // subheaderTypographyProps={{ variant: "h4", component: "h4" }}
             />
             <div className="title-block">
               <Select
@@ -325,14 +308,8 @@ function DesignerMakerCheckerConfiguration() {
                 IconComponent={ArrowDown}
                 MenuProps={{
                   className: "select-item",
-                  anchorOrigin: {
-                    vertical: "bottom",
-                    horizontal: "right",
-                  },
-                  transformOrigin: {
-                    vertical: "top",
-                    horizontal: "right",
-                  },
+                  anchorOrigin: { vertical: "bottom", horizontal: "right" },
+                  transformOrigin: { vertical: "top", horizontal: "right" },
                   PaperProps: {
                     sx: {
                       "@media (-webkit-device-pixel-ratio: 1.25)": {
@@ -376,7 +353,7 @@ function DesignerMakerCheckerConfiguration() {
                   rowData={rowData}
                   columnDefs={columnDefs}
                   defaultColDef={defaultColDef}
-                  suppressRowHoverHighlight={suppressRowHoverHighlight}
+                  suppressRowHoverHighlight={false}
                   headerHeight={51}
                   rowHeight={52}
                   suppressDragLeaveHidesColumns={true}
@@ -384,9 +361,8 @@ function DesignerMakerCheckerConfiguration() {
                     id: "NewCardIssueance_1.norowstoshow",
                     defaultMessage: "No Rows To Show",
                   })}
-                  enableRtl={intl.locale === "ar" ? true : false}
-                // className="table-component notification-configuration"
-                ></AgGridReact>
+                  enableRtl={intl.locale === "ar"}
+                />
               </div>
             </Box>
             <TablePagination
@@ -396,11 +372,12 @@ function DesignerMakerCheckerConfiguration() {
                 id: "Pagination.rowsperpage",
                 defaultMessage: "Rows per page",
               })}
-              labelDisplayedRows={({ from, to, count }) => `${from}-${to} 
-                        ${intl.formatMessage({
-                id: "Pagination.of",
-                defaultMessage: "Of",
-              })} ${count}`}
+              labelDisplayedRows={({ from, to, count }) =>
+                `${from}-${to} ${intl.formatMessage({
+                  id: "Pagination.of",
+                  defaultMessage: "Of",
+                })} ${count}`
+              }
               component="div"
               count={totalNumRecords}
               rowsPerPage={rowsPerPage}
@@ -409,14 +386,8 @@ function DesignerMakerCheckerConfiguration() {
                 onFocus: getValues,
                 IconComponent: ArrowDropDown,
                 MenuProps: {
-                  anchorOrigin: {
-                    vertical: "bottom",
-                    horizontal: "right",
-                  },
-                  transformOrigin: {
-                    vertical: "top",
-                    horizontal: "right",
-                  },
+                  anchorOrigin: { vertical: "bottom", horizontal: "right" },
+                  transformOrigin: { vertical: "top", horizontal: "right" },
                   PaperProps: {
                     sx: {
                       "@media (-webkit-device-pixel-ratio: 1.25)": {
@@ -427,22 +398,14 @@ function DesignerMakerCheckerConfiguration() {
                   },
                 },
               }}
-              backIconButtonProps={{
-                classes: {
-                  root: "prev-arrow",
-                },
-              }}
-              nextIconButtonProps={{
-                classes: {
-                  root: "next-arrow",
-                },
-              }}
+              backIconButtonProps={{ classes: { root: "prev-arrow" } }}
+              nextIconButtonProps={{ classes: { root: "next-arrow" } }}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </div>
-        </main >
-      </div >
+        </main>
+      </div>
     </>
   );
 }

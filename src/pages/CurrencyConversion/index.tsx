@@ -20,7 +20,7 @@ import {
   Typography
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   add_rounded,
@@ -40,11 +40,10 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { CurrencyModel } from "../../models/configuration/CurrencyModel";
-import { Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import validations from "../../utils/validations";
-import { RoleMainModel } from "../../models/security/RoleModel";
-import { AssignRoles, selectedInst } from "../../services/request";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 
 function CurrencyConversion() {
   const intl = useIntl();
@@ -57,14 +56,12 @@ function CurrencyConversion() {
   >([]);
   const [currencies, setCurrencies] = useState<CurrencyModel[]>([]);
     const [selectInstitutionVal, setSelectInstitutionVal] = React.useState("");
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
 
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CRNCY_CONV), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
 
   const handleClickOpen = (isEdited: boolean) => {
     if (!isEdited) {
@@ -278,7 +275,7 @@ function CurrencyConversion() {
                   className="btn-light"
                   endIcon={<img src={add_rounded} alt="add" />}
                                   onClick={() => handleClickOpen(false)}
-                                  disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Currency_Conversion) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Currency_Conversion)?.accessAdd === "1")}
+                                  disabled={!canAdd}
                 >
                   <FormattedMessage
                     id="CurrencyConversion.addBtn"
@@ -375,14 +372,14 @@ function CurrencyConversion() {
                             onClick={() =>
                               editCurrencyConversion(row.currencyConversionId)
                             }
-                                      disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Currency_Conversion) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Currency_Conversion)?.accessUpdate === "1")}
+                                      disabled={!canUpdate}
                           >
                             <img src={edit_ic} alt="mail" />
                           </IconButton>
                           <IconButton
                             className="border-icon-btn no-border sm"
                                       onClick={() => onDelete(row)}
-                                      disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Currency_Conversion) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Currency_Conversion)?.accessDelete === "1")}
+                                      disabled={!canDelete}
                           >
                             <img src={delete_ic} alt="mail" />
                           </IconButton>

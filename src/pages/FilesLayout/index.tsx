@@ -34,12 +34,13 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { InstitutionAccountsService } from "../../services/configuration/institution-accounts-service";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 // import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Institution } from "../../models/configuration/InstitutionModel";
 import Swal from "sweetalert2";
-import { Errors, StatusCode } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { toast } from "react-toastify";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import { visuallyHidden } from "@mui/utils";
@@ -52,6 +53,12 @@ const rowsPerPageOptions = [10, 20, 25, 50];
 function FilesLayout() {
     const intl = useIntl();
     const navigate = useNavigate();
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.FILES_SCREEN), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
+
     const [rowData, setRowData] = useState<LayoutModel[]>([]);
     const [filteredRow, setFilteredRow] = useState<LayoutModel[]>([]);
     const [totalNumRecords, setTotalNumRecords] = useState<number>(0);

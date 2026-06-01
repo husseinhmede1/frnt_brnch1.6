@@ -19,7 +19,7 @@ import {
   Typography
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "react-toastify";
@@ -29,10 +29,9 @@ import {
   delete_ic, edit_ic
 } from "../../assets/images";
 import { TerminalTypeModel } from "../../models/configuration/TerminalTypeModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { TerminalTypeService } from "../../services/configuration/terminal-type-service";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import validations from "../../utils/validations";
 
 function TerminalType() {
@@ -46,14 +45,12 @@ function TerminalType() {
   const [enable, setEnable] = useState(true);
   // const [addNew, setAddNew] = useState(true);
     const intl = useIntl();
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
 
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.TERM_TYPE), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
 
   const {
     register,
@@ -275,7 +272,7 @@ function TerminalType() {
                                   className="btn-light"
                                   endIcon={<img src={add_rounded} alt="add" />}
                                   onClick={() => handleClickOpen(false)}
-                                  disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Terminal_Type) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Terminal_Type)?.accessAdd === "1")}
+                                  disabled={!canAdd}
                               >
                   <FormattedMessage
                     id="TerminalTypes.addBtn"
@@ -335,21 +332,21 @@ function TerminalType() {
                                       onChange={(e) =>
                                           changeStatus(row.terminalTypesId, e)
                                       }
-                                      disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Terminal_Type) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Terminal_Type)?.accessUpdate === "1")}
+                                      disabled={!canUpdate}
                                   />
                                   <IconButton
                                       className="border-icon-btn no-border sm"
                                       onClick={() =>
                                           editTerminalType(row.terminalTypesId)
                                       }
-                                      disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Terminal_Type) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Terminal_Type)?.accessUpdate === "1")}
+                                      disabled={!canUpdate}
                                   >
                                       <img src={edit_ic} alt="mail" />
                                   </IconButton>
                                   <IconButton
                                       className="border-icon-btn no-border sm"
                                       onClick={() => onDelete(row.terminalTypesId)}
-                                      disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Terminal_Type) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Terminal_Type)?.accessDelete === "1")}
+                                      disabled={!canDelete}
                                   >
                                       <img src={delete_ic} alt="mail" />
                           </IconButton>

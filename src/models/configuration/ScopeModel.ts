@@ -21,14 +21,13 @@ export default class ScopeModel {
 
   
   export class APIListModel {
-    api!: API;
-    apiDescription!: string;
-    apiFunction!: string;
     apiId!: number;
-    apiObject!: string;
+    apiCode!: string;
     apiUrl!: string;
+    apiObject!: string;
+    apiFunction!: string;
+    apiDesc!: string;
+    enabled!: string;
     instId!: number;
-    instName!: string;
-    scope!: ScopeModel;
-    stp!: string
+    stp!: string;
   }

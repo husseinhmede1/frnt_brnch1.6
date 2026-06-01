@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Button from '@mui/material/Button';
 import { add_rounded, clone_ic, delete_ic, down_arrow_icon, edit_ic, search_ic } from "../../assets/images";
 import { Box, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, Grid, IconButton, InputAdornment, InputBase, MenuItem, Select, SelectChangeEvent, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel, TextField, Typography } from "@mui/material";
@@ -8,13 +8,12 @@ import { EntityService } from "../../services/entityManagement/entity-service";
 import { EntityLevelModel, EntityListModel, EntitySearchCriteria, EntitySearchRequestModel } from "../../models/entityManagement/EntityModel";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { Errors, StatusCode, rowsPerPageOptionsConst, ROLE_ACTIVITY, CodePrefix } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode, rowsPerPageOptionsConst, CodePrefix } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { visuallyHidden } from "@mui/utils";
 import { Institution } from "../../models/configuration/InstitutionModel";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
-import { RoleMainModel } from "../../models/security/RoleModel";
-import { AssignRoles, selectedInst } from "../../services/request";
 import { Controller, useForm } from "react-hook-form";
 import { SystemCodeModel } from "../../models/entityManagement/SystemCodeModel";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
@@ -33,15 +32,13 @@ function EntitiesListing() {
   const [selectInstitutionVal, setSelectInstitutionVal] = React.useState("");
   const [institution, setInstitution] = useState<Institution[]>([]);
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
   const intl = useIntl();
 
-  useEffect(() => {
-    const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
-  }, [selectedInst]);
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.ENTITIES), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
   const [businessTypeList, setBusinessTypeList] = React.useState<
     SystemCodeModel[]
   >([]);
@@ -709,7 +706,7 @@ const exportToPDF = async () => {
                   />
                 </FormControl> */}
                 <Button variant="contained"
-                  disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities)?.accessUpdate === "1")}
+                  disabled={!canUpdate}
                   disableElevation color="secondary"
                   className="btn-light"
                   endIcon={<img src={clone_ic}
@@ -727,7 +724,7 @@ const exportToPDF = async () => {
                   className="btn-light"
                   endIcon={<img src={add_rounded} alt="add" />}
                   onClick={() => navigate("/entities-definition", { state: { institutionId: selectInstitutionVal } })}
-                  disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities)?.accessAdd === "1")}
+                  disabled={!canAdd}
                 >
                   <FormattedMessage
                     id="Entity.button.addEntity"
@@ -1071,11 +1068,7 @@ const exportToPDF = async () => {
         type="submit"
         endIcon={<img src={search_ic} alt="search" />}
         disabled={
-          !(
-            roleActivity?.roleActivities.find(
-              (act) => act.activity?.activityDesc === ROLE_ACTIVITY.Entities
-            )?.accessUpdate === "1"
-          )
+          !canUpdate
         }
       >
         <FormattedMessage
@@ -1275,7 +1268,7 @@ const exportToPDF = async () => {
                         <IconButton
                             className="border-icon-btn no-border sm"
                             onClick={() => onSubmitCloneEntity(row.entityId)}
-                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities)?.accessUpdate === "1")}
+                            disabled={!canUpdate}
                           >
                             <img src={clone_ic} alt="clone" />
                           </IconButton>
@@ -1285,19 +1278,19 @@ const exportToPDF = async () => {
                             onChange={(e) =>
                               changeStatus(row.entityId, e)
                             }
-                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities)?.accessUpdate === "1")}
+                            disabled={!canUpdate}
                           />
                           <IconButton
                             className="border-icon-btn no-border sm"
                             onClick={() => editEntity(row.entityId)}
-                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities)?.accessUpdate === "1")}
+                            disabled={!canUpdate}
                           >
                             <img src={edit_ic} alt="edit" />
                           </IconButton>
                           <IconButton
                             className="border-icon-btn no-border sm"
                             onClick={() => onDelete(row.entityId)}
-                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Entities)?.accessDelete === "1")}
+                            disabled={!canDelete}
                           >
                             <img src={delete_ic} alt="delete" />
                           </IconButton>

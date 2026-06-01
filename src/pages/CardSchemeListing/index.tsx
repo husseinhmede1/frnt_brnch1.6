@@ -10,31 +10,28 @@ import {
     Typography
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { add_rounded, delete_ic, edit_ic } from "../../assets/images";
 import { CardSchemeModel } from "../../models/configuration/CardSchemeModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { CardSchemeService } from "../../services/configuration/card-scheme-service";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 
 function CardScheme() {
     const navigate = useNavigate();
     const intl = useIntl();
 
     const [CardSchemes, setCardSchemes] = useState<CardSchemeModel[]>([]);
-    const [roleActivity, setRoleActivity] = useState<RoleMainModel>();
 
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CARDSCH), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
 
     useEffect(() => {
         getAllCardScheme();
@@ -160,7 +157,7 @@ function CardScheme() {
                                     disableElevation
                                     className="btn-light"
                                     endIcon={<img src={add_rounded} alt="add" />}
-                                    disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Card_Scheme) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Card_Scheme)?.accessAdd === "1")}
+                                    disabled={!canAdd}
                                 >
                                     <FormattedMessage
                                         id="CardScheme.addBtn"
@@ -211,19 +208,19 @@ function CardScheme() {
                                                         className="custom"
                                                         checked={row.status === "1" ? true : false}
                                                         onChange={(e) => changeStatus(row.cardSchemeId, e)}
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Card_Scheme) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Card_Scheme)?.accessUpdate === "1")}
+                                                        disabled={!canUpdate}
                                                     />
                                                     <IconButton
                                                         className="border-icon-btn no-border sm"
                                                         onClick={() => editInstitute(row.cardSchemeId, row.recordSequenceNumber)}
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Card_Scheme) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Card_Scheme)?.accessUpdate === "1")}
+                                                        disabled={!canUpdate}
                                                     >
                                                         <img src={edit_ic} alt="mail" />
                                                     </IconButton>
                                                     <IconButton
                                                         className="border-icon-btn no-border sm"
                                                         onClick={() => onDelete(row.cardSchemeId)}
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Card_Scheme) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Card_Scheme)?.accessDelete === "1")}
+                                                        disabled={!canDelete}
                                                     >
                                                         <img src={delete_ic} alt="mail" />
                                                     </IconButton>

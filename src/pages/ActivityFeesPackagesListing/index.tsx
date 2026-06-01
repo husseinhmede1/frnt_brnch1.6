@@ -25,7 +25,7 @@ import {
   InputBase
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
@@ -45,12 +45,11 @@ import {
 import { ActivityFeesPackage, ActivityFeesPackageSorted } from "../../models/configuration/ActivityFeesPackageModel";
 import { Institution } from "../../models/configuration/InstitutionModel";
 import { EntityListModel } from "../../models/entityManagement/EntityModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { ActivityFeesPackagesService } from "../../services/configuration/activity-fee-service";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { EntityService } from "../../services/entityManagement/entity-service";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import { visuallyHidden } from "@mui/utils";
 import { MccModel } from "../../models/configuration/MccModel";
@@ -77,20 +76,17 @@ function ActivityFeesPackagesListing() {
   const [selectInstitutionVal, setSelectInstitutionVal] = React.useState("");
   const [selectedPackageId, setSelectedPackageId] = React.useState<number>();
   const [fieldKey, setFieldKey] = React.useState<number>(0);
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.ACT_FEE_PKG), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
+
   const [mccList, setMccList] = React.useState<MccModel[]>([]);
   const [selectMcc, setSelectMcc] = React.useState("");
   const [entityId, setEntityId] = React.useState("");
   const [entityName, setEntityName] = React.useState("");
   const [parentId, setParentId] = React.useState("");
-
-  useEffect(() => {
-    const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-    //console.log("get role activity", assignRole);
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
-  }, [selectedInst]);
 
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof ActivityFeesPackageSorted>('packageId');
@@ -466,7 +462,7 @@ const getEntitiesBySearchCriteria = async () => {
                 className="btn-light"
                 endIcon={<img src={add_rounded} alt="add" />}
                 onClick={() => navigate("/activity-fees-packages-definition", { state: { institutionId: selectInstitutionVal } })}
-                disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs)?.accessAdd === "1")}
+                disabled={!canAdd}
               >
                 <FormattedMessage
                   id="ActivityFeesPackage.addPackage"
@@ -561,7 +557,7 @@ const getEntitiesBySearchCriteria = async () => {
                             <Button
                               variant="contained"
                               disableElevation
-                              disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs)?.accessUpdate === "1")}
+                              disabled={!canUpdate}
                               className="btn-light sm rounded"
                               onClick={() => handleClickOpen(row.packageId, row.recordSeqId)}
                             >
@@ -578,19 +574,19 @@ const getEntitiesBySearchCriteria = async () => {
                           className="custom"
                           checked={row.status === "1" ? true : false}
                           onChange={(e) => changeStatus(row.recordSeqId,row.packageId, e)}
-                          disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs)?.accessUpdate === "1")}
+                          disabled={!canUpdate}
                         />
                         <IconButton
                           className="border-icon-btn no-border sm"
                           onClick={() => editHandler(row.recordSeqId)}
-                          disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs)?.accessUpdate === "1")}
+                          disabled={!canUpdate}
                         >
                           <img src={edit_ic} alt="edit-btn" />
                         </IconButton>
                         <IconButton
                           className="border-icon-btn no-border sm"
                           onClick={() => onDelete(row.recordSeqId)}
-                          disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Activity_Fees_Pkgs)?.accessDelete === "1")}
+                          disabled={!canDelete}
                         >
                           <img src={delete_ic} alt="delete-btn" />
                         </IconButton>

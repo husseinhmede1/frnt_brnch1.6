@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Box, Button, Checkbox, Divider, FormControl, FormHelperText, Grid, InputBase, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
-import {useState, useEffect } from 'react'
+import {useState, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router';
@@ -9,13 +9,20 @@ import { ic_check, ic_checked } from '../../assets/images';
 import { Activity, ActivityAPI, RoleMainModel, RoleModel } from '../../models/security/RoleModel';
 import { ActivityService, RoleService } from '../../services/security/role-service';
 import { allowAlphaNumeric, allowOnlyCharacters } from '../../utils/commonfunction';
-import { StatusCode } from '../../utils/constant';
+import { ConfigurationActivities, StatusCode } from '../../utils/constant';
+import { getActivityPermissions } from '../../utils/permissionUtils';
 import validations from '../../utils/validations';
 
 const RoleDefinition = () => {
     const { id } = useParams<{ id?: string }>();
     const intl = useIntl();
     const navigate = useNavigate();
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNGROLES), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
+
     const [enabled, setEnabled] = useState<boolean>(true);
     const [assignprivilege, setAssignprivilege] = useState<Activity[]>([]);
     const [isSystemAdminRole, setIsSystemAdminRole] = useState(false);

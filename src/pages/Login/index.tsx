@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import { lockIcon, logo, userIcon } from "../../assets/images";
 import { ILoginModel } from "../../models/login/LoginModel";
 import { LoginService } from "../../services/login-service";
+import { ModuleService } from "../../services/lookup/module-service";
 import { ApplicationLanguage, StatusCode } from "../../utils/constant";
 import { LOCALSTORAGE_KEYS, setLocalStorage, signOut } from "../../utils/helper";
 import validations from "../../utils/validations";
@@ -43,7 +44,7 @@ function Login() {
 
     const onSubmit = async (value: ILoginModel) => {
         LoginService.loginUser(value)
-            .then((res: any) => {
+            .then(async (res: any) => {
                 if (res.status === StatusCode.Success) {
                     const data = JSON.stringify(res.data);
                     if (res.data?.user && res.data?.user?.institution?.length === 0) {
@@ -91,6 +92,14 @@ function Login() {
                             LOCALSTORAGE_KEYS.INSTITUTES,
                             JSON.stringify(filteredInstitute)
                         );
+                        try {
+                            const modulesRes = await ModuleService.getAllModulesByUser();
+                            setLocalStorage(
+                                LOCALSTORAGE_KEYS.MODULES,
+                                JSON.stringify(modulesRes.data)
+                            );
+                        } catch (_) { /* non-critical */ }
+
                         toast.success("Successfully logged in");
                         navigate("/dashboard");
                         window.location.reload();

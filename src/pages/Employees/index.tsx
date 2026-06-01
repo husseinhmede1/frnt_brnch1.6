@@ -25,7 +25,7 @@ import {
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import { getRoles } from "@testing-library/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "react-toastify";
@@ -40,13 +40,12 @@ import { EmployeeModel } from "../../models/configuration/EmployeeModel";
 import { Institution } from "../../models/configuration/InstitutionModel";
 import { RoleMasterModel } from "../../models/configuration/RoleMasterModel";
 import { SystemCodeModel } from "../../models/entityManagement/SystemCodeModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { EmployeeService } from "../../services/configuration/employee-service";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { RoleMasterService } from "../../services/configuration/role-master-service";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { CodePrefix, Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { CodePrefix, ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import validations from "../../utils/validations";
 import { visuallyHidden } from "@mui/utils";
@@ -64,8 +63,13 @@ function Employees() {
     const [roleId, setRoleId] = useState<number | null>(null);
     const [selectInstitutionVal, setSelectInstitutionVal] = useState("");
     const [enable, setEnable] = useState(false);
-    const [roleActivity, setRoleActivity] = useState<RoleMainModel>();
     const intl = useIntl();
+
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.EMPLOYEES), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
 
     const [order, setOrder] = useState<Order>('asc');
     const [orderBy, setOrderBy] = useState<keyof EmployeeModel>('employeeId');
@@ -105,13 +109,6 @@ function Employees() {
 
     /* END (sort table data) */
 
-
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
 
     const {
         register,
@@ -347,7 +344,7 @@ function Employees() {
                                     className="btn-light"
                                     endIcon={<img src={add_rounded} alt="add" />}
                                     onClick={() => handleClickOpen(false)}
-                                    disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Employees) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Employees)?.accessAdd === "1")}
+                                    disabled={!canAdd}
                                 >
                                     <FormattedMessage
                                         id="Employees.addBtn"
@@ -479,19 +476,19 @@ function Employees() {
                                                             className="custom"
                                                             checked={row.status === "1" ? true : false}
                                                             onChange={(e) => changeStatus(row.employeeId, e)}
-                                                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Employees) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Employees)?.accessUpdate === "1")}
+                                                            disabled={!canUpdate}
                                                         />
                                                         <IconButton
                                                             className="border-icon-btn no-border sm"
                                                             onClick={() => editEmployee(row.employeeId)}
-                                                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Employees) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Employees)?.accessUpdate === "1")}
+                                                            disabled={!canUpdate}
                                                         >
                                                             <img src={edit_ic} alt="mail" />
                                                         </IconButton>
                                                         <IconButton
                                                             className="border-icon-btn no-border sm"
                                                             onClick={() => onDelete(row.employeeId)}
-                                                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Employees) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Employees)?.accessDelete === "1")}
+                                                            disabled={!canDelete}
                                                         >
                                                             <img src={delete_ic} alt="mail" />
                                                         </IconButton>

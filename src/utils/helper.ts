@@ -3,7 +3,8 @@ export enum LOCALSTORAGE_KEYS {
     LANGUAGE = "LANGUAGE",
     DEFAULT_INSTITUTE = "DEFAULT_INSTITUTE",
     INSTITUTES = "INSTITUTES",
-    ROLE_ACTIVITY = "ROLE_ACTIVITY"
+    ROLE_ACTIVITY = "ROLE_ACTIVITY",
+    MODULES = "modules"
 }
 
 const defaults = {
@@ -11,7 +12,8 @@ const defaults = {
     LANGUAGE: "English",
     DEFAULT_INSTITUTE: "",
     INSTITUTES: "",
-    ROLE_ACTIVITY: ""
+    ROLE_ACTIVITY: "",
+    MODULES: ""
 };
 
 type FeatureKey = keyof typeof defaults;

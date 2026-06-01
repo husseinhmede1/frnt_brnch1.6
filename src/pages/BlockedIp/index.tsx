@@ -15,7 +15,7 @@ import {
     Typography
 } from '@mui/material';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
@@ -23,10 +23,9 @@ import Swal from 'sweetalert2';
 import { delete_ic, search_ic } from '../../assets/images';
 import { BlockedIpService } from '../../services/security/blocked-ip-service';
 import { BlockedIpResponse } from '../../models/security/BlockedIpModel';
-import { rowsPerPageOptionsConst, StatusCode ,ROLE_ACTIVITY} from '../../utils/constant';
+import { ConfigurationActivities, rowsPerPageOptionsConst, StatusCode } from '../../utils/constant';
 import { visuallyHidden } from "@mui/utils";
-import { AssignRoles, selectedInst } from '../../services/request';
-import { RoleMainModel} from '../../models/security/RoleModel';
+import { getActivityPermissions } from '../../utils/permissionUtils';
 
 type Order = 'asc' | 'desc';
 
@@ -37,27 +36,22 @@ const BlockedIps = () => {
     const [ipList, setIpList] = useState<BlockedIpResponse[]>([]);
     const [filteredIpList, setFilteredIpList] = useState<BlockedIpResponse[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [accessDelete, setAccessDelete] = useState(false);
 
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.BLKD_IP), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptionsConst[0]);
 
     const [order, setOrder] = useState<Order>('asc');
     const [orderBy, setOrderBy] = useState<keyof BlockedIpResponse>('ipAddress');
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
- 
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-            if (assignRole !== undefined) {
-                setRoleActivity(assignRole);
-            }
-    }, [selectedInst]);
 
     useEffect(() => {
         getBlockedIps();
-        // setAccessDelete(!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.BlockedIP) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.BlockedIP)?.accessDelete === "1"))
-    }, [roleActivity]);
+    }, []);
     
     useEffect(() => {
         onSearch();
@@ -323,12 +317,11 @@ const BlockedIps = () => {
                                                 >
 
                                                     <IconButton
-                                                        className={`border-icon-btn no-border sm ${!accessDelete?'':'darker'}`}
+                                                        className={`border-icon-btn no-border sm ${canDelete?'':'darker'}`}
                                                         onClick={() => onDelete(row.id)}
-                                                        disabled = {accessDelete}
+                                                        disabled={!canDelete}
                                                     >
                                                         <img src={delete_ic} alt="delete" />
-                                                        {accessDelete}
                                                     </IconButton>
 
                                                 </div>

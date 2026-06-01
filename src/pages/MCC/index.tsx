@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import Button from "@mui/material/Button";
 import {
   add_rounded,
@@ -42,15 +42,14 @@ import validations from "../../utils/validations";
 import Swal from "sweetalert2";
 import { CardSchemeModel } from "../../models/configuration/CardSchemeModel";
 import {
+  ConfigurationActivities,
   Errors,
   StatusCode,
   rowsPerPageOptionsConst,
   CodePrefix,
-  ROLE_ACTIVITY,
 } from "../../utils/constant";
 import { visuallyHidden } from "@mui/utils";
-import { RoleMainModel } from "../../models/security/RoleModel";
-import { AssignRoles, selectedInst } from "../../services/request";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { SystemCodeModel } from "../../models/entityManagement/SystemCodeModel";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
@@ -83,16 +82,12 @@ function Mcc() {
     null
   );
   const intl = useIntl();
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
 
-  useEffect(() => {
-    const assignRole = AssignRoles.find(
-      (role: RoleMainModel) => role.instId === selectedInst
-    );
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
-  }, [selectedInst]);
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MCC_SCREEN), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
 
   const handleClickOpen = (isEdit: boolean) => {
     if (!isEdit) {
@@ -452,18 +447,7 @@ function Mcc() {
                   className="btn-light"
                   endIcon={<img src={add_rounded} alt="add" />}
                   onClick={() => handleClickOpen(false)}
-                  disabled={
-                    !(
-                      roleActivity?.roleActivities.find(
-                        (act) =>
-                          act.activity?.activityDesc === ROLE_ACTIVITY.MCC
-                      ) &&
-                      roleActivity?.roleActivities.find(
-                        (act) =>
-                          act.activity?.activityDesc === ROLE_ACTIVITY.MCC
-                      )?.accessAdd === "1"
-                    )
-                  }
+                  disabled={!canAdd}
                 >
                   <FormattedMessage id="Mcc.addBtn" defaultMessage="Add MCC" />
                 </Button>
@@ -704,40 +688,14 @@ function Mcc() {
                             <IconButton
                               className="border-icon-btn no-border sm"
                               onClick={() => editMcc(row.mccId)}
-                              disabled={
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.MCC
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.MCC
-                                  )?.accessUpdate === "1"
-                                )
-                              }
+                              disabled={!canUpdate}
                             >
                               <img src={edit_ic} alt="mail" />
                             </IconButton>
                             <IconButton
                               className="border-icon-btn no-border sm"
                               onClick={() => onDelete(row.mccId)}
-                              disabled={
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.MCC
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.MCC
-                                  )?.accessDelete === "1"
-                                )
-                              }
+                              disabled={!canDelete}
                             >
                               <img src={delete_ic} alt="mail" />
                             </IconButton>

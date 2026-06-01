@@ -20,7 +20,7 @@ import {
   Typography
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "react-toastify";
@@ -32,11 +32,10 @@ import {
   edit_ic
 } from "../../assets/images";
 import { TransactionGroupModel, TransactionsModel } from "../../models/configuration/TransactionGroupModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { TransactionGroupService } from "../../services/configuration/transaction-group-service";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { CodePrefix, Errors, ROLE_ACTIVITY, StatusCode, TRANS_USAGE } from "../../utils/constant";
+import { CodePrefix, ConfigurationActivities, Errors, StatusCode, TRANS_USAGE } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import validations from "../../utils/validations";
 
@@ -70,14 +69,12 @@ function TransactionGroupsListing() {
   const [enable, setEnable] = useState(true);
   const [addNew, setAddNew] = useState(true);
   const intl = useIntl();
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
 
-  useEffect(() => {
-    const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
-  }, [selectedInst]);
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.TXN_GROUP), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
 
   const {
     register,
@@ -508,7 +505,7 @@ function TransactionGroupsListing() {
                   className="btn-light"
                   endIcon={<img src={add_rounded} alt="add" />}
                   onClick={() => handleClickOpen(false)}
-                  disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transaction_Group) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transaction_Group)?.accessAdd === "1")}
+                  disabled={!canAdd}
                 >
                   <FormattedMessage
                     id="TransactionGroup.addBtn"
@@ -555,21 +552,21 @@ function TransactionGroupsListing() {
                               onChange={(e) =>
                                 changeStatus(row.transactionGroupId, e)
                               }
-                              disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transaction_Group) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transaction_Group)?.accessUpdate === "1")}
+                              disabled={!canUpdate}
                             />
                             <IconButton
                               className="border-icon-btn no-border sm"
                               onClick={() =>
                                 editTransactionGroup(row.transactionGroupId)
                               }
-                              disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transaction_Group) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transaction_Group)?.accessUpdate === "1")}
+                              disabled={!canUpdate}
                             >
                               <img src={edit_ic} alt="mail" />
                             </IconButton>
                             <IconButton
                               className="border-icon-btn no-border sm"
                               onClick={() => onDelete(row.transactionGroupId)}
-                              disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transaction_Group) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transaction_Group)?.accessDelete === "1")}
+                              disabled={!canDelete}
                             >
                               <img src={delete_ic} alt="mail" />
                             </IconButton>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import Button from "@mui/material/Button";
 import {
   add_rounded,
@@ -42,15 +42,16 @@ import moment from "moment";
 import { ManualNonActivityTransactionServices } from "../../services/entityManagement/manual-non-activity-transaction-services";
 import { toast } from "react-toastify";
 import {
+  ConfigurationActivities,
   Errors,
   StatusCode,
   rowsPerPageOptionsConst,
   TRANS_USAGE,
   OptionType,
   ENTITY_LEVEL,
-  ROLE_ACTIVITY,
   CodePrefix,
 } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validations from "../../utils/validations";
@@ -62,8 +63,6 @@ import { EntityService } from "../../services/entityManagement/entity-service";
 import Swal from "sweetalert2";
 import { visuallyHidden } from "@mui/utils";
 import ReactSelect from "react-select";
-import { RoleMainModel } from "../../models/security/RoleModel";
-import { AssignRoles, selectedInst } from "../../services/request";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
 
 function ManualNonActivityFeesListing() {
@@ -101,18 +100,17 @@ function ManualNonActivityFeesListing() {
     value: string;
   }>();
   const [outletErr, setOutletErr] = React.useState("");
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
+
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNNONACTFEE), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
 
   const outLetIdRequired = "Entity/OutletId is required.";
   useEffect(() => {
-    const assignRole = AssignRoles.find(
-      (role: RoleMainModel) => role.instId === selectedInst
-    );
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
     getActiveInstitution();
-  }, [selectedInst]);
+  }, []);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -518,20 +516,7 @@ function ManualNonActivityFeesListing() {
                       { state: { institutionId: selectInstitutionVal , isEdit:false } }
                     )
                   }
-                  disabled={
-                    !(
-                      roleActivity?.roleActivities.find(
-                        (act) =>
-                          act.activity?.activityDesc ===
-                          ROLE_ACTIVITY.Manual_non_Activity_Fees
-                      ) &&
-                      roleActivity?.roleActivities.find(
-                        (act) =>
-                          act.activity?.activityDesc ===
-                          ROLE_ACTIVITY.Manual_non_Activity_Fees
-                      )?.accessAdd === "1"
-                    )
-                  }
+                  disabled={!canAdd}
                 >
                   {intl.formatMessage({
                     id: "Entity.button.addTransaction",
@@ -914,20 +899,7 @@ function ManualNonActivityFeesListing() {
                                   row.manualNonActivityTransactionId
                                 )
                               }
-                              disabled={
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Manual_non_Activity_Fees
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Manual_non_Activity_Fees
-                                  )?.accessUpdate === "1"
-                                )
-                              }
+                              disabled={!canUpdate}
                             >
                               <img src={edit_ic} alt="mail" />
                             </IconButton>
@@ -936,20 +908,7 @@ function ManualNonActivityFeesListing() {
                               onClick={() =>
                                 onDelete(row.manualNonActivityTransactionId)
                               }
-                              disabled={
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Manual_non_Activity_Fees
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Manual_non_Activity_Fees
-                                  )?.accessDelete === "1"
-                                )
-                              }
+                              disabled={!canDelete}
                             >
                               <img src={delete_ic} alt="mail" />
                             </IconButton>

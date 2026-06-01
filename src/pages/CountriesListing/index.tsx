@@ -21,7 +21,7 @@ import {
   Typography,
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
@@ -35,11 +35,10 @@ import {
 } from "../../assets/images";
 import { CountryModel } from "../../models/configuration/CountryModel";
 import { CurrencyModel } from "../../models/configuration/CurrencyModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { CountryService } from "../../services/configuration/country-service";
 import { CurrencyService } from "../../services/configuration/currency-service";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import validations from "../../utils/validations";
 
 function CountriesListing() {
@@ -62,14 +61,12 @@ function CountriesListing() {
   });
   const [currencyList, setCurrencyList] = React.useState<CurrencyModel[]>([]);
     const intl = useIntl();
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
 
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CNTRY), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
 
     const handleClose = () => {
         setOpen(false);
@@ -342,19 +339,19 @@ function CountriesListing() {
                                     onChange={(e) =>
                                       changeStatus(row.cntryId, e)
                                     }
-                                    disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Country) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Country)?.accessUpdate === "1")}
+                                    disabled={!canUpdate}
                                   />
                                   <IconButton
                                     className="border-icon-btn no-border sm"
                                     onClick={() => onEdit(row)}
-                                    disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Country) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Country)?.accessUpdate === "1")}
+                                    disabled={!canUpdate}
                                   >
                                     <img src={edit_ic} alt="mail" />
                                   </IconButton>
                                   <IconButton
                                     className="border-icon-btn no-border sm"
                                     onClick={() => onDelete(row.cntryId)}
-                                    disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Country) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Country)?.accessDelete === "1")}
+                                    disabled={!canDelete}
                                   >
                                     <img src={delete_ic} alt="mail" />
                                   </IconButton>

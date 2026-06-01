@@ -18,7 +18,7 @@ import {
   Typography
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLocation } from "react-router";
@@ -32,10 +32,11 @@ import { GetUserById, RoleInst, UserMainModel, UserModel } from "../../models/se
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
 import { AssignRoles, InstitutionList, selectedInst, userStr } from "../../services/request";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { RoleService } from "../../services/security/role-service";
 import { UserService } from "../../services/security/user-service";
 import { allowOnlyCharacters, allowOnlyNumbers, avoidSpace } from "../../utils/commonfunction";
-import { CodePrefix, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { CodePrefix, ConfigurationActivities, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import validations from "../../utils/validations";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -68,7 +69,12 @@ function UserDefinition() {
   //const [userRole, setUserRole] = React.useState<string>("");
   const [prefLanguage, setPrefLanguage] = React.useState<SystemCodeModel[]>([]);
   const [prefSystemCodeId, setSystemCodeId] = React.useState<number | null>(null);
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNGUSERS), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
+
   const [loginUser, setLoginUser] = React.useState<any>();
   const [editUserData, setEditUserData] = React.useState<UserMainModel>();
   const [userInst, setUserInst] = React.useState<IInstitution[]>([]);
@@ -76,14 +82,7 @@ function UserDefinition() {
   const [isUserProfile,setIsUserProfile] = React.useState(false)
 
   useEffect(() => {
-    const userStr = getLocalStorage(LOCALSTORAGE_KEYS.USER);
-
-    if (userStr !== null) {
-      const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-      if (assignRole !== undefined) {
-        setRoleActivity(assignRole);
-      }
-    }
+    // roleActivity replaced by getActivityPermissions
   }, [selectedInst]);
 
   const handleChangeRole = (event: SelectChangeEvent, instId: string) => {
@@ -551,7 +550,7 @@ function UserDefinition() {
                             inputProps={{ "aria-label": "Without label" }}
                             IconComponent={() => <img src={down_arrow_icon} alt="" />}
                             fullWidth
-                            disabled={isUserProfile || !(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1") && pathname.startsWith('/user-profile')}
+                            disabled={isUserProfile || (!canUpdate && pathname.startsWith('/user-profile'))}
                           >
                             <MenuItem disabled value=" ">
                               <em>{intl.formatMessage({ id: "SettingsCreateUser_4.selectinstitution", defaultMessage: "Select Institution" })}</em>
@@ -647,8 +646,7 @@ function UserDefinition() {
                                       icon={(
                                           pathname.startsWith('/user-profile') ?
                                             !(
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) &&
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1" &&
+                                              canUpdate &&
                                               loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
                                             ) :
                                             (
@@ -659,8 +657,7 @@ function UserDefinition() {
                                       checkedIcon={(
                                           pathname.startsWith('/user-profile') ?
                                             !(
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) &&
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1" &&
+                                              canUpdate &&
                                               loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
                                             ) :
                                             (
@@ -676,8 +673,7 @@ function UserDefinition() {
                                           isUserProfile ||(
                                           pathname.startsWith('/user-profile') ?
                                             !(
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) &&
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1" &&
+                                              canUpdate &&
                                               loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
                                             ) :
                                             (
@@ -700,8 +696,7 @@ function UserDefinition() {
                                           isUserProfile || (
                                             pathname.startsWith('/user-profile') ?
                                               !(
-                                                roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) &&
-                                                roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1" &&
+                                                canUpdate &&
                                                 loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
                                               ) :
                                               (
@@ -736,8 +731,7 @@ function UserDefinition() {
                                       icon={(
                                           pathname.startsWith('/user-profile') ?
                                             !(
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) &&
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1" &&
+                                              canUpdate &&
                                               loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "1"
                                             ) :
                                             (
@@ -748,8 +742,7 @@ function UserDefinition() {
                                       checkedIcon={(
                                           pathname.startsWith('/user-profile') ?
                                             !(
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) &&
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1" &&
+                                              canUpdate &&
                                               loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "1"
                                             ) :
                                             (
@@ -763,8 +756,7 @@ function UserDefinition() {
                                       disabled={(
                                           pathname.startsWith('/user-profile') ?
                                             !(
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) &&
-                                              roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1" &&
+                                              canUpdate &&
                                               loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "1"
                                             ) :
                                             (
@@ -786,8 +778,7 @@ function UserDefinition() {
                                         disabled={(
                                             pathname.startsWith('/user-profile') ?
                                               !(
-                                                roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users) &&
-                                                roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Users)?.accessUpdate === "1" &&
+                                                canUpdate &&
                                                 loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "1"
                                               ) :
                                               (

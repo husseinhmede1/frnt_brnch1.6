@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormHelperText, Grid, IconButton, InputBase, MenuItem, Select, SelectChangeEvent, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl'
 import { useNavigate } from 'react-router';
@@ -10,11 +10,10 @@ import { visuallyHidden } from "@mui/utils";
 import { add_rounded, delete_ic, down_arrow_icon, edit_ic, resetIcon } from '../../assets/images';
 import { SystemCodeModel } from '../../models/entityManagement/SystemCodeModel';
 import { TransactionsModel } from '../../models/entityManagement/TransactionModel';
-import { RoleMainModel } from '../../models/security/RoleModel';
 import { TransactionService } from '../../services/configuration/transaction-service';
 import { SystemCodeServices } from '../../services/entityManagement/system-code-services';
-import { AssignRoles, selectedInst } from '../../services/request';
-import { CodePrefix, CodeSuffix, Errors, ROLE_ACTIVITY, StatusCode } from '../../utils/constant';
+import { CodePrefix, CodeSuffix, ConfigurationActivities, Errors, StatusCode } from '../../utils/constant';
+import { getActivityPermissions } from '../../utils/permissionUtils';
 import { getLocalStorage, LOCALSTORAGE_KEYS } from '../../utils/helper';
 import validations from '../../utils/validations';
 import { avoidSpace } from '../../utils/commonfunction';
@@ -26,7 +25,12 @@ const Transactions = () => {
     const [traType, setTraType] = React.useState<string>(" ");
     const [transactions, setTransactions] = React.useState<TransactionsModel[]>([]);
     const [updateFlag, setUpdateFlag] = React.useState<string>("0");
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.TRNINQ), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
+
     const [usageList, setUsageList] = React.useState<SystemCodeModel[]>([]);
     const [trasUsage, setTransUsage] = React.useState<string>(" ");
     const [order, setOrder] = React.useState<Order>('asc');
@@ -35,13 +39,6 @@ const Transactions = () => {
     const handleTransUsage = (event: SelectChangeEvent) => {
         setTransUsage(event.target.value);
     }
-
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
 
     const handleClose = () => {
         setOpen(false);
@@ -278,7 +275,7 @@ const Transactions = () => {
                                     disableElevation className="btn-light"
                                     endIcon={<img src={add_rounded} alt="add" />}
                                     onClick={() => handleClickOpen()}
-                                    disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transactions) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transactions)?.accessAdd === "1")}
+                                    disabled={!canAdd}
                                 >
                                     <FormattedMessage
                                         id="Transactions.addtransaction"
@@ -378,19 +375,19 @@ const Transactions = () => {
                                                         onChange={(e) =>
                                                             changeStatus(row.transactionId as string, e)
                                                         }
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transactions) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transactions)?.accessUpdate === "1")}
+                                                        disabled={!canUpdate}
                                                     />
                                                     <IconButton
                                                         className="border-icon-btn no-border sm"
                                                         onClick={() => editTransactions(row.transactionId as string)}
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transactions) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transactions)?.accessUpdate === "1")}
+                                                        disabled={!canUpdate}
                                                     >
                                                         <img src={edit_ic} alt="edit" />
                                                     </IconButton>
                                                     <IconButton
                                                         className="border-icon-btn no-border sm"
                                                         onClick={() => onDelete(row.transactionId as string)}
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transactions) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Transactions)?.accessDelete === "1")}
+                                                        disabled={!canDelete}
                                                     >
                                                         <img src={delete_ic} alt="delete" />
                                                     </IconButton>

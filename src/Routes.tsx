@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "../src/pages/Login";
 import Dashboard from "../src/pages/Dashboard";
@@ -9,6 +9,7 @@ import Currency from "../src/pages/Currency";
 import CardScheme from "./pages/CardSchemeListing";
 import CardSchemeDefinition from "./pages/CardSchemeDefinition";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ActivityProtectedRoute from "./components/ActivityProtectedRoute";
 import CurrencyConversion from "./pages/CurrencyConversion";
 import TerminalType from "./pages/TerminalType";
 import CurrencyRate from "./pages/CurrencyRate";
@@ -28,8 +29,9 @@ import MerchantTransacionDefinition from "./pages/MerchantTransactionDefinition"
 import MerchantTransactionListing from "./pages/MerchantTransactionListing";
 import ManualNonActivityFeesListing from "./pages/ManualNonActivityFeesTransactionListing";
 import ManualNonActivityFeesDefinition from "./pages/ManualNonActivityFeesTransactionDefinition";
-import NonActivityFeeQuery from "./pages/NonActivityFeeQuery"
+import NonActivityFeeQuery from "./pages/NonActivityFeeQuery";
 import NotFound from "./components/NotFound";
+import PendingActivities from "./pages/PendingActivity";
 
 // UI
 import DesignerLogin from "../src/pages/UI/Login/index";
@@ -68,8 +70,6 @@ import UserDefinition from "./pages/UserDefinition";
 import Roles from "./pages/Roles";
 import RoleDefinition from "./pages/RoleDefinition";
 import BlockedIp from "./pages/BlockedIp/index";
-import { RoleMainModel } from "./models/security/RoleModel";
-import { AssignRoles, selectedInst } from "./services/request";
 import Transactions from "./pages/Transactions";
 import SystemCodes from "./pages/SystemCodes";
 import UnauthorisedPage from "./components/UnauthorisedPage";
@@ -91,13 +91,6 @@ import ImportMerchants from "./pages/ImportMerchants";
 import SmartMdrReport from './pages/SmartMdrReport';
 import SmartCicoReport from './pages/SmartCicoReport';
 import SmartMerchantDetailsReport from './pages/SmartMerchantDetailsReport';
-// import Campaigns from "./merchantPortal/campaign/DesignerCampaigns";
-// import CampaignDefinition from "./merchantPortal/campaign/Campaigndefinition";
-// import Newsletters from "./merchantPortal/newsletters/DesignerNewsletter";
-// import NewsletterDefinition from "./merchantPortal/newsletters/Newsletterdefinition";
-// import Services from "./merchantPortal/services/DesignerServices";
-// import ServicesDefinition from "./merchantPortal/services/Servicesdefinition";
-// import Registrations from "./merchantPortal/registrationApproval/DesignerRegistrationApproval";
 import Jobs from "./pages/Jobs/Jobs";
 import TaskBatchSize from "./pages/TaskBatchSize/TaskBatchSize";
 import JobMonitoring from "./pages/JobMonitoring/JobMonitoring";
@@ -106,158 +99,150 @@ import JobDefinition from "./pages/JobDefinition/JobDefinition";
 import FilesLayout from "./pages/FilesLayout";
 import AddEditFileLayout from "./pages/NewFileLayout";
 import DesignerMakerCheckerConfiguration from "./pages/MakerCheckerConfiguration";
+import { ConfigurationActivities } from "./utils/constant";
+
+// Shorthand helpers to keep JSX concise
+const AP = (code: string, child: React.ReactNode) => (
+    <ActivityProtectedRoute activityCode={code}>{child}</ActivityProtectedRoute>
+);
+const PR = (child: React.ReactNode) => (
+    <ProtectedRoute>{child}</ProtectedRoute>
+);
 
 function RouteList() {
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
-
-    useEffect(() => {
-        const userStr = getLocalStorage(LOCALSTORAGE_KEYS.USER);
-        if (userStr !== null) {
-            const assignRole = AssignRoles?.find((role: RoleMainModel) => role.instId === selectedInst);
-            if (assignRole !== undefined) {
-                setRoleActivity(assignRole);
-            }
-        }
-    }, [selectedInst]);
-
     return (
         <Routes>
-            {/* Design Routes */}
-            <Route path="/designer/login" element={<DesignerLogin />} />
-            <Route path="/designer/forgot" element={<DesignerForgot />} />
-            <Route path="/designer/reset" element={<DesignerReset />} />
-            <Route path="/designer/change-password" element={<DesignerChangePass />} />
-            <Route path="/designer/home" element={<DesignerLanding />} />
-            <Route path="/designer/institution/list" element={<DesignerInstitutionList />} />
-            <Route path="/designer/institution/add" element={<DesignerInstitutionAdd />} />
-            <Route path="/designer/currency/list" element={<DesignerCurrencyList />} />
-            <Route path="/designer/card-scheme/list" element={<DesignerCardSchemeList />} />
-            <Route path="/designer/card-scheme/add" element={<DesignerCardSchemeAdd />} />
-            <Route path="/designer/transaction-group" element={<DesignerTransactionGrp />} />
-            <Route path="/designer/terminal-type" element={<DesignerTerminalType />} />
-            <Route path="/designer/activity-fees-packages/list" element={<DesignerActivityFeesPackagesList />} />
-            <Route path="/designer/package-definition" element={<DesignerActivityFeesPackageDefinition />} />
+            {/* ── Designer / UI preview routes (no auth needed) ── */}
+            <Route path="/designer/login"                         element={<DesignerLogin />} />
+            <Route path="/designer/forgot"                        element={<DesignerForgot />} />
+            <Route path="/designer/reset"                         element={<DesignerReset />} />
+            <Route path="/designer/change-password"               element={<DesignerChangePass />} />
+            <Route path="/designer/home"                          element={<DesignerLanding />} />
+            <Route path="/designer/institution/list"              element={<DesignerInstitutionList />} />
+            <Route path="/designer/institution/add"               element={<DesignerInstitutionAdd />} />
+            <Route path="/designer/currency/list"                 element={<DesignerCurrencyList />} />
+            <Route path="/designer/card-scheme/list"              element={<DesignerCardSchemeList />} />
+            <Route path="/designer/card-scheme/add"               element={<DesignerCardSchemeAdd />} />
+            <Route path="/designer/transaction-group"             element={<DesignerTransactionGrp />} />
+            <Route path="/designer/terminal-type"                 element={<DesignerTerminalType />} />
+            <Route path="/designer/activity-fees-packages/list"   element={<DesignerActivityFeesPackagesList />} />
+            <Route path="/designer/package-definition"            element={<DesignerActivityFeesPackageDefinition />} />
             <Route path="/designer/non-activity-fees-packages/list" element={<DesignerNonActivityFeesPackagesList />} />
-            <Route path="/designer/non-package-definition" element={<DesignerNonActivityFeesPackageDefinition />} />
-            <Route path="/designer/currency-conversion" element={<DesignerCurrencyConversion />} />
-            <Route path="/designer/currency-rate" element={<DesignerCurrencyRate />} />
-            <Route path="/designer/employees" element={<DesignerEmployees />} />
-            <Route path="/designer/contacts" element={<DesignerContacts />} />
-            <Route path="/designer/mcc" element={<DesignerMcc />} />
-            <Route path="/designer/manage-countries" element={<DesignerManageCountry />} />
-            <Route path="/designer/entities" element={<DesignerEntities />} />
-            <Route path="/designer/add-entities" element={<DesignerAddEntities />} />
-            <Route path="/designer/acquiring-transactions" element={<DesignerAcquiringTransactions />} />
-            <Route path="/designer/merchant-transaction/list" element={<DesignerManualMerchantTransactionList />} />
-            <Route path="/designer/merchant-transaction/add" element={<DesignerManualMerchantTransactionAdd />} />
+            <Route path="/designer/non-package-definition"        element={<DesignerNonActivityFeesPackageDefinition />} />
+            <Route path="/designer/currency-conversion"           element={<DesignerCurrencyConversion />} />
+            <Route path="/designer/currency-rate"                 element={<DesignerCurrencyRate />} />
+            <Route path="/designer/employees"                     element={<DesignerEmployees />} />
+            <Route path="/designer/contacts"                      element={<DesignerContacts />} />
+            <Route path="/designer/mcc"                           element={<DesignerMcc />} />
+            <Route path="/designer/manage-countries"              element={<DesignerManageCountry />} />
+            <Route path="/designer/entities"                      element={<DesignerEntities />} />
+            <Route path="/designer/add-entities"                  element={<DesignerAddEntities />} />
+            <Route path="/designer/acquiring-transactions"        element={<DesignerAcquiringTransactions />} />
+            <Route path="/designer/merchant-transaction/list"     element={<DesignerManualMerchantTransactionList />} />
+            <Route path="/designer/merchant-transaction/add"      element={<DesignerManualMerchantTransactionAdd />} />
             <Route path="/designer/non-merchant-transaction/list" element={<DesignerManualNonActivityFeeTransactionList />} />
-            <Route path="/designer/non-merchant-transaction/add" element={<DesignerManualNonActivityFeeTransactionAdd />} />
-            <Route path="/designer/non-activity-fee-query" element={<DesignerNonActivityFeeQuery />} />
-            <Route path="/designer/campaigns" element={<DesignerNonActivityFeeQuery />} />
+            <Route path="/designer/non-merchant-transaction/add"  element={<DesignerManualNonActivityFeeTransactionAdd />} />
+            <Route path="/designer/non-activity-fee-query"        element={<DesignerNonActivityFeeQuery />} />
+            <Route path="/designer/campaigns"                     element={<DesignerNonActivityFeeQuery />} />
 
-            {/* Development Routes */}
-            <Route path="/" element={<Login />} />
-            <Route path="/login/root" element={<Login />} />
-
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/institutions-listing" element={<ProtectedRoute><InstitutionsListing /></ProtectedRoute>} />
-            <Route path="/institutions-definition" element={<ProtectedRoute><InstitutionsDefinition /></ProtectedRoute>} />
-            <Route path="/institutions-definition/:id" element={<ProtectedRoute><InstitutionsDefinition /></ProtectedRoute>} />
-            <Route path="/institutions-definition/:id/:institutionControlId" element={<ProtectedRoute><InstitutionsDefinition /></ProtectedRoute>} />
-            <Route path="/transaction-groups-listing" element={<ProtectedRoute><TransactionGroupsListing /></ProtectedRoute>} />
-            <Route path="/currency" element={<ProtectedRoute><Currency /></ProtectedRoute>} />
-            <Route path="/currency-rate" element={<ProtectedRoute><CurrencyRate /></ProtectedRoute>} />
-            <Route path="/terminal-type" element={<ProtectedRoute><TerminalType /></ProtectedRoute>} />
-            <Route path="/card-scheme" element={<ProtectedRoute><CardScheme /></ProtectedRoute>} />
-            <Route path="/card-scheme-definition" element={<ProtectedRoute><CardSchemeDefinition /></ProtectedRoute>} />
-            <Route path="/card-scheme-definition/:id" element={<ProtectedRoute><CardSchemeDefinition /></ProtectedRoute>} />
-            <Route path="/card-scheme-definition/:id/:recordSequenceNumber" element={<ProtectedRoute><CardSchemeDefinition /></ProtectedRoute>} />
-            <Route path="/currency-conversion" element={<ProtectedRoute><CurrencyConversion /></ProtectedRoute>} />
-            <Route path="/country" element={<ProtectedRoute><CountriesListing /></ProtectedRoute>} />
-            <Route path="/city" element={<ProtectedRoute><CitiesListing /></ProtectedRoute>} />
-            <Route path="/mcc" element={<ProtectedRoute><Mcc /></ProtectedRoute>} />
-            <Route path="/file-layouts" element={<ProtectedRoute><FilesLayout /></ProtectedRoute>} />
-            <Route path="/add-edit-filelayout" element={<ProtectedRoute><AddEditFileLayout /></ProtectedRoute>} />
-            <Route path="/add-edit-filelayout/:layoutId" element={<ProtectedRoute><AddEditFileLayout /></ProtectedRoute>} />
-            <Route path="/employees" element={<ProtectedRoute><Employees /></ProtectedRoute>} />
-            <Route path="/activity-fees-packages" element={<ProtectedRoute><ActivityFeesPackagesListing /></ProtectedRoute>} />
-            <Route path="/activity-fees-packages-definition" element={<ProtectedRoute><ActivityFeesPackageDefinition /></ProtectedRoute>} />
-            <Route path="/activity-fees-packages-definition/:id" element={<ProtectedRoute><ActivityFeesPackageDefinition /></ProtectedRoute>} />
-            <Route path="/non-activity-fees-packages" element={<ProtectedRoute><NonActivityFeesPackagesListing /></ProtectedRoute>} />
-            <Route path="/non-activity-fees-packages-definition" element={<ProtectedRoute><NonActivityFeesPackagesDefinition /></ProtectedRoute>} />
-            <Route path="/non-activity-fees-packages-definition/:id" element={<ProtectedRoute><NonActivityFeesPackagesDefinition /></ProtectedRoute>} />
-            <Route path="/entities-listing" element={<ProtectedRoute><EntitiesListing /></ProtectedRoute>} />
-            <Route path="/merchant-transaction-listing" element={<ProtectedRoute><MerchantTransactionListing /></ProtectedRoute>} />
-            <Route path="/merchant-transaction-definition" element={<ProtectedRoute><MerchantTransacionDefinition /></ProtectedRoute>} />
-            <Route path="/merchant-transaction-definition/:id" element={<ProtectedRoute><MerchantTransacionDefinition /></ProtectedRoute>} />
-            <Route path="/manual-non-activity-fees-transaction-listing" element={<ProtectedRoute><ManualNonActivityFeesListing /></ProtectedRoute>} />
-            <Route path="/manual-non-activity-fees-transaction-definition" element={<ProtectedRoute><ManualNonActivityFeesDefinition /></ProtectedRoute>} />
-            <Route path="/manual-non-activity-fees-transaction-definition/:id" element={<ProtectedRoute><ManualNonActivityFeesDefinition /></ProtectedRoute>} />
-            <Route path="/non-activity-fee-query" element={<ProtectedRoute><NonActivityFeeQuery /></ProtectedRoute>} />
-            <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+            {/* ── Public routes ── */}
+            <Route path="/"                element={<Login />} />
+            <Route path="/login/root"      element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/entities-definition" element={<ProtectedRoute><EntitiesDefinition /></ProtectedRoute>} />
-            <Route path="/entities-definition/:id" element={<ProtectedRoute><EntitiesDefinition /></ProtectedRoute>} />
-            <Route path="/entities-definition-clone/:id" element={<ProtectedRoute><EntitiesDefinition /></ProtectedRoute>} />
-            <Route path="/acquiring-transactions" element={<ProtectedRoute><AcquiringTransactions /></ProtectedRoute>} />
-            <Route path="/users-listing" element={<ProtectedRoute><Users /></ProtectedRoute>} />
-            <Route path="/users-definition" element={<ProtectedRoute><UserDefinition /></ProtectedRoute>} />
-            <Route path="/users-definition/:id" element={<ProtectedRoute><UserDefinition /></ProtectedRoute>} />
-            <Route path="/user-profile/:id" element={<ProtectedRoute><UserDefinition /></ProtectedRoute>} />
-            <Route path="/roles-listing" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
-            <Route path="/roles-definition" element={<ProtectedRoute><RoleDefinition /></ProtectedRoute>} />
-            <Route path="/roles-definition/:id" element={<ProtectedRoute><RoleDefinition /></ProtectedRoute>} />
-            <Route path="/transactions-definition" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
-            <Route path="/system-codes" element={<ProtectedRoute><SystemCodes /></ProtectedRoute>} />
-            <Route path="/maker-checker-configuration" element={<ProtectedRoute><DesignerMakerCheckerConfiguration /></ProtectedRoute>} />
-            <Route path="/blocked-ips-listing" element={<ProtectedRoute><BlockedIp/></ProtectedRoute>}/>
-            <Route path="/blocked-ips-listing" element={<ProtectedRoute><BlockedIp/></ProtectedRoute>} />
-            <Route path="/not-found" element={<NotFound />} />
-            <Route path="/unauthorised-access" element={<ProtectedRoute><UnauthorisedPage /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-            <Route path="/issuer-profile" element={<ProtectedRoute><IssuerProfile /></ProtectedRoute>} />
-            <Route path="/range-definition" element={<ProtectedRoute><RangeDefinition /></ProtectedRoute>} />
-            <Route path="/range-definition/:id/:issuerAcqProfile" element={<ProtectedRoute><RangeDefinition /></ProtectedRoute>} />
-            <Route path="/range-definition/:issuerAcqProfile" element={<ProtectedRoute><RangeDefinition /></ProtectedRoute>} />
-            <Route path="/issuer-relation/:institutionId" element={<ProtectedRoute><IssuerRelation /></ProtectedRoute>} />
-            <Route path="/issuer-relation/:id/:issuerAcqProfile/:institutionId" element={<ProtectedRoute><IssuerRelation /></ProtectedRoute>} />
-            <Route path="/bankcode" element={<ProtectedRoute><BankInfo /></ProtectedRoute>} />
-            <Route path="/processing-events" element={<ProtectedRoute><TaskExecution /></ProtectedRoute>} />
-            <Route path="/institution-accounts" element={<ProtectedRoute><InstitutionAccounts /></ProtectedRoute>} />
-            <Route path="/institution-accs-details/:id/:issuerAcqProfile/:cardSchemeId/:currencyCode/:bankCode" element={<ProtectedRoute><InstitutionAccountsDefinition /></ProtectedRoute>} />
-            <Route path="/institution-accs-details" element={<ProtectedRoute><InstitutionAccountsDefinition /></ProtectedRoute>} />
-            <Route path="/institution-accs-details/:institutionId" element={<ProtectedRoute><InstitutionAccountsDefinition /></ProtectedRoute>} />
-            <Route path="/accounting-template" element={<ProtectedRoute><AccountingTemplatesHDR /></ProtectedRoute>} />
-            <Route path="/accounting-details/add/:institutionId" element={<ProtectedRoute><AccountingTemplateBank /></ProtectedRoute>} />
-            <Route path="/accounting-details/:id" element={<ProtectedRoute><AccountingTemplateBank /></ProtectedRoute>} />
-            <Route path="/accounting-subheader-details/:instId/:headerId" element={<ProtectedRoute><AccountingTemplateDetails /></ProtectedRoute>} />
-            <Route path="/accounting-subheader-details/:instId/:headerId/:subId/:bankCode/:desc" element={<ProtectedRoute><AccountingTemplateDetails /></ProtectedRoute>} />
-            <Route path="/output-template" element={<ProtectedRoute><OutputFileTemplateHdr /></ProtectedRoute>} />
-            <Route path="/output-details" element={<ProtectedRoute><OutputFileTemplateDetails /></ProtectedRoute>} />
-            <Route path="/output-details/:institutionId" element={<ProtectedRoute><OutputFileTemplateDetails /></ProtectedRoute>} />
-            <Route path="/output-details/:id/:sumPerAccount/:merchantSubSummary/:outputFormat/:outputFileType/:bankCode/:bankFilesOutputId/:institutionId" element={<ProtectedRoute><OutputFileTemplateDetails /></ProtectedRoute>} />
-            <Route path="/output-details/:id/:sumPerAccount/:merchantSubSummary/:outputFormat/:outputFileType/:institutionId/:instSubSummary" element={<ProtectedRoute><OutputFileTemplateDetails /></ProtectedRoute>} />
-            <Route path="/task-execution-log" element={<ProtectedRoute><TaskExecutionLog /></ProtectedRoute>} />
-            <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
-            <Route path="/job-definition" element={<ProtectedRoute><JobDefinition /></ProtectedRoute>} />
-            <Route path="/job-definition/:id" element={<ProtectedRoute><JobDefinition /></ProtectedRoute>} />
-            <Route path="/job-monitoring" element={<ProtectedRoute><JobMonitoring /></ProtectedRoute>} />
-            <Route path="/job-execution-log/:id" element={<ProtectedRoute><JobExecutionLog /></ProtectedRoute>} />
-            <Route path="/task-batch-size" element={<ProtectedRoute><TaskBatchSize /></ProtectedRoute>} />
-            <Route path="/import-merchants" element={<ProtectedRoute><ImportMerchants /></ProtectedRoute>} />
-            <Route path="/bm-mdr-report" element={<ProtectedRoute><SmartMdrReport /></ProtectedRoute>} />
-            <Route path="/cico-mdr-report" element={<ProtectedRoute><SmartCicoReport /></ProtectedRoute>} />
-            <Route path="/merchant-details-report" element={<ProtectedRoute><SmartMerchantDetailsReport /></ProtectedRoute>} />
-            {/* <Route path="/campaigns" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
-            <Route path="/campaigns-definition" element={<ProtectedRoute><CampaignDefinition /></ProtectedRoute>} />
-            <Route path="/campaigns-definition/:id" element={<ProtectedRoute><CampaignDefinition /></ProtectedRoute>} />
-            <Route path="/newsletters" element={<ProtectedRoute><Newsletters /></ProtectedRoute>} />
-            <Route path="/newsletter-definition" element={<ProtectedRoute><NewsletterDefinition /></ProtectedRoute>} />
-            <Route path="/newsletter-definition/:id" element={<ProtectedRoute><NewsletterDefinition /></ProtectedRoute>} />
-            <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
-            <Route path="/service-definition" element={<ProtectedRoute><ServicesDefinition /></ProtectedRoute>} />
-            <Route path="/service-definition/:id" element={<ProtectedRoute><ServicesDefinition /></ProtectedRoute>} />
-            <Route path="/registration-approval" element={<ProtectedRoute><Registrations /></ProtectedRoute>} /> */}
+            <Route path="/not-found"       element={<NotFound />} />
+            <Route path="*"                element={<NotFound />} />
+
+            {/* ── Auth-only (no specific activity check needed) ── */}
+            <Route path="/dashboard"        element={PR(<Dashboard />)} />
+            <Route path="/change-password"  element={PR(<ChangePassword />)} />
+            <Route path="/unauthorised-access" element={PR(<UnauthorisedPage />)} />
+
+            {/* ── Activity-guarded listing screens ── */}
+            <Route path="/institutions-listing"                         element={AP(ConfigurationActivities.INST,           <InstitutionsListing />)} />
+            <Route path="/currency"                                     element={AP(ConfigurationActivities.CURNCY,         <Currency />)} />
+            <Route path="/currency-rate"                                element={AP(ConfigurationActivities.CRNCY_RATE,     <CurrencyRate />)} />
+            <Route path="/currency-conversion"                          element={AP(ConfigurationActivities.CRNCY_CONV,     <CurrencyConversion />)} />
+            <Route path="/terminal-type"                                element={AP(ConfigurationActivities.TERM_TYPE,      <TerminalType />)} />
+            <Route path="/card-scheme"                                  element={AP(ConfigurationActivities.CARDSCH,        <CardScheme />)} />
+            <Route path="/country"                                      element={AP(ConfigurationActivities.CNTRY,          <CountriesListing />)} />
+            <Route path="/city"                                         element={AP(ConfigurationActivities.CITY,           <CitiesListing />)} />
+            <Route path="/mcc"                                          element={AP(ConfigurationActivities.MCC_SCREEN,     <Mcc />)} />
+            <Route path="/file-layouts"                                 element={AP(ConfigurationActivities.FILES_SCREEN,   <FilesLayout />)} />
+            <Route path="/employees"                                    element={AP(ConfigurationActivities.EMPLOYEES,      <Employees />)} />
+            <Route path="/activity-fees-packages"                       element={AP(ConfigurationActivities.ACT_FEE_PKG,    <ActivityFeesPackagesListing />)} />
+            <Route path="/non-activity-fees-packages"                   element={AP(ConfigurationActivities.NONACT_FEE_PKG, <NonActivityFeesPackagesListing />)} />
+            <Route path="/entities-listing"                             element={AP(ConfigurationActivities.ENTITIES,       <EntitiesListing />)} />
+            <Route path="/merchant-transaction-listing"                 element={AP(ConfigurationActivities.MANTRANS,       <MerchantTransactionListing />)} />
+            <Route path="/manual-non-activity-fees-transaction-listing" element={AP(ConfigurationActivities.MNNONACTFEE,    <ManualNonActivityFeesListing />)} />
+            <Route path="/non-activity-fee-query"                       element={AP(ConfigurationActivities.NONACFEEINQ,    <NonActivityFeeQuery />)} />
+            <Route path="/acquiring-transactions"                       element={AP(ConfigurationActivities.TRNINQ,         <AcquiringTransactions />)} />
+            <Route path="/users-listing"                                element={AP(ConfigurationActivities.MNGUSERS,       <Users />)} />
+            <Route path="/roles-listing"                                element={AP(ConfigurationActivities.MNGROLES,       <Roles />)} />
+            <Route path="/transactions-definition"                      element={AP(ConfigurationActivities.TRNINQ,         <Transactions />)} />
+            <Route path="/system-codes"                                 element={AP(ConfigurationActivities.SYS_CODES,      <SystemCodes />)} />
+            <Route path="/maker-checker-configuration"                  element={AP(ConfigurationActivities.MAKER_CHECKER,  <DesignerMakerCheckerConfiguration />)} />
+            <Route path="/blocked-ips-listing"                          element={AP(ConfigurationActivities.BLKD_IP,        <BlockedIp />)} />
+            <Route path="/transaction-groups-listing"                   element={AP(ConfigurationActivities.TXN_GROUP,      <TransactionGroupsListing />)} />
+            <Route path="/pending-activities"                           element={AP(ConfigurationActivities.APPRV_ENT,      <PendingActivities />)} />
+
+            {/* ── Definition / sub-pages: inherit parent auth, no extra activity check ── */}
+            <Route path="/institutions-definition"                      element={PR(<InstitutionsDefinition />)} />
+            <Route path="/institutions-definition/:id"                  element={PR(<InstitutionsDefinition />)} />
+            <Route path="/institutions-definition/:id/:institutionControlId" element={PR(<InstitutionsDefinition />)} />
+            <Route path="/card-scheme-definition"                       element={PR(<CardSchemeDefinition />)} />
+            <Route path="/card-scheme-definition/:id"                   element={PR(<CardSchemeDefinition />)} />
+            <Route path="/card-scheme-definition/:id/:recordSequenceNumber" element={PR(<CardSchemeDefinition />)} />
+            <Route path="/add-edit-filelayout"                          element={PR(<AddEditFileLayout />)} />
+            <Route path="/add-edit-filelayout/:layoutId"                element={PR(<AddEditFileLayout />)} />
+            <Route path="/activity-fees-packages-definition"            element={PR(<ActivityFeesPackageDefinition />)} />
+            <Route path="/activity-fees-packages-definition/:id"        element={PR(<ActivityFeesPackageDefinition />)} />
+            <Route path="/non-activity-fees-packages-definition"        element={PR(<NonActivityFeesPackagesDefinition />)} />
+            <Route path="/non-activity-fees-packages-definition/:id"    element={PR(<NonActivityFeesPackagesDefinition />)} />
+            <Route path="/entities-definition"                          element={PR(<EntitiesDefinition />)} />
+            <Route path="/entities-definition/:id"                      element={PR(<EntitiesDefinition />)} />
+            <Route path="/entities-definition-clone/:id"                element={PR(<EntitiesDefinition />)} />
+            <Route path="/merchant-transaction-definition"              element={PR(<MerchantTransacionDefinition />)} />
+            <Route path="/merchant-transaction-definition/:id"          element={PR(<MerchantTransacionDefinition />)} />
+            <Route path="/manual-non-activity-fees-transaction-definition"     element={PR(<ManualNonActivityFeesDefinition />)} />
+            <Route path="/manual-non-activity-fees-transaction-definition/:id" element={PR(<ManualNonActivityFeesDefinition />)} />
+            <Route path="/users-definition"                             element={PR(<UserDefinition />)} />
+            <Route path="/users-definition/:id"                         element={PR(<UserDefinition />)} />
+            <Route path="/user-profile/:id"                             element={PR(<UserDefinition />)} />
+            <Route path="/roles-definition"                             element={PR(<RoleDefinition />)} />
+            <Route path="/roles-definition/:id"                         element={PR(<RoleDefinition />)} />
+            <Route path="/issuer-profile"                               element={PR(<IssuerProfile />)} />
+            <Route path="/range-definition"                             element={PR(<RangeDefinition />)} />
+            <Route path="/range-definition/:id/:issuerAcqProfile"       element={PR(<RangeDefinition />)} />
+            <Route path="/range-definition/:issuerAcqProfile"           element={PR(<RangeDefinition />)} />
+            <Route path="/issuer-relation/:institutionId"               element={PR(<IssuerRelation />)} />
+            <Route path="/issuer-relation/:id/:issuerAcqProfile/:institutionId" element={PR(<IssuerRelation />)} />
+            <Route path="/bankcode"                                     element={PR(<BankInfo />)} />
+            <Route path="/processing-events"                            element={PR(<TaskExecution />)} />
+            <Route path="/institution-accounts"                         element={PR(<InstitutionAccounts />)} />
+            <Route path="/institution-accs-details/:id/:issuerAcqProfile/:cardSchemeId/:currencyCode/:bankCode" element={PR(<InstitutionAccountsDefinition />)} />
+            <Route path="/institution-accs-details"                     element={PR(<InstitutionAccountsDefinition />)} />
+            <Route path="/institution-accs-details/:institutionId"      element={PR(<InstitutionAccountsDefinition />)} />
+            <Route path="/accounting-template"                          element={PR(<AccountingTemplatesHDR />)} />
+            <Route path="/accounting-details/add/:institutionId"        element={PR(<AccountingTemplateBank />)} />
+            <Route path="/accounting-details/:id"                       element={PR(<AccountingTemplateBank />)} />
+            <Route path="/accounting-subheader-details/:instId/:headerId" element={PR(<AccountingTemplateDetails />)} />
+            <Route path="/accounting-subheader-details/:instId/:headerId/:subId/:bankCode/:desc" element={PR(<AccountingTemplateDetails />)} />
+            <Route path="/output-template"                              element={PR(<OutputFileTemplateHdr />)} />
+            <Route path="/output-details"                               element={PR(<OutputFileTemplateDetails />)} />
+            <Route path="/output-details/:institutionId"                element={PR(<OutputFileTemplateDetails />)} />
+            <Route path="/output-details/:id/:sumPerAccount/:merchantSubSummary/:outputFormat/:outputFileType/:bankCode/:bankFilesOutputId/:institutionId" element={PR(<OutputFileTemplateDetails />)} />
+            <Route path="/output-details/:id/:sumPerAccount/:merchantSubSummary/:outputFormat/:outputFileType/:institutionId/:instSubSummary" element={PR(<OutputFileTemplateDetails />)} />
+            <Route path="/task-execution-log"                           element={PR(<TaskExecutionLog />)} />
+            <Route path="/jobs"                                         element={PR(<Jobs />)} />
+            <Route path="/job-definition"                               element={PR(<JobDefinition />)} />
+            <Route path="/job-definition/:id"                           element={PR(<JobDefinition />)} />
+            <Route path="/job-monitoring"                               element={PR(<JobMonitoring />)} />
+            <Route path="/job-execution-log/:id"                        element={PR(<JobExecutionLog />)} />
+            <Route path="/task-batch-size"                              element={PR(<TaskBatchSize />)} />
+            <Route path="/import-merchants"                             element={PR(<ImportMerchants />)} />
+            <Route path="/bm-mdr-report"                                element={PR(<SmartMdrReport />)} />
+            <Route path="/cico-mdr-report"                              element={PR(<SmartCicoReport />)} />
+            <Route path="/merchant-details-report"                      element={PR(<SmartMerchantDetailsReport />)} />
         </Routes>
     );
 }

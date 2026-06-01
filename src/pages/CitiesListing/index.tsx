@@ -25,7 +25,7 @@ import {
   Typography,
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "react-toastify";
@@ -39,11 +39,10 @@ import {
   saveIcon,
 } from "../../assets/images";
 import { CityModel } from "../../models/configuration/CityModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { CityService } from "../../services/configuration/city-service";
 import { CurrencyService } from "../../services/configuration/currency-service";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import validations from "../../utils/validations";
 import { CountryModel } from "../../models/configuration/CountryModel";
 import { CountryService } from "../../services/configuration/country-service";
@@ -67,14 +66,12 @@ function CitiesListing() {
   const [isUpdateState, setIsUpdateState] = React.useState<boolean>(false);
 
     const intl = useIntl();
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
 
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CITY), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
 
     const handleClose = () => {
         setOpen(false);
@@ -333,7 +330,7 @@ const getSortedCities = () => {
                                 className="btn-light"
                                 endIcon={<img src={add_rounded} alt="add" />}
                                 onClick={() => handleClickOpen(false,new CityModel,false)}
-                                disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.City) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.City)?.accessAdd === "1")}
+                                disabled={!canAdd}
                               >
                                 <FormattedMessage
                                   id="City.addBtn"
@@ -423,14 +420,14 @@ const getSortedCities = () => {
                     <IconButton
                       className="border-icon-btn no-border sm"
                       onClick={() => handleClickOpen(false,row,true)}
-                      disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.City) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.City)?.accessUpdate === "1")}
+                      disabled={!canUpdate}
                     >
                       <img src={edit_ic} alt="mail" />
                     </IconButton>
                     <IconButton
                       className="border-icon-btn no-border sm"
                       onClick={() => onDelete(row.cityId)}
-                      disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.City) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.City)?.accessDelete === "1")}
+                      disabled={!canDelete}
                     >
                       <img src={delete_ic} alt="mail" />
                     </IconButton>

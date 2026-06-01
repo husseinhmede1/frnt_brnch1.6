@@ -25,7 +25,7 @@ import {
   InputBase
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
@@ -45,12 +45,11 @@ import {
 import { ActivityFeesPackage, ActivityFeesPackageSorted } from "../../models/configuration/ActivityFeesPackageModel";
 import { Institution } from "../../models/configuration/InstitutionModel";
 import { EntityListModel } from "../../models/entityManagement/EntityModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { NonActivityFeesPackagesService } from "../../services/configuration/nonactivity-fee-service";
 import { EntityService } from "../../services/entityManagement/entity-service";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import { visuallyHidden } from "@mui/utils";
 import { MccModel } from "../../models/configuration/MccModel";
@@ -75,19 +74,18 @@ function NonActivityFeesPackagesListing() {
   const [assignedCheckedEntityList, setAssignedCheckedEntityList] = React.useState<EntityListModel[]>([]);
   const [selectedPackageId, setSelectedPackageId] = React.useState<string>();
   const [fieldKey, setFieldKey] = React.useState<number>(0);
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.NONACT_FEE_PKG), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
+
   const [mccList, setMccList] = React.useState<MccModel[]>([]);
   const [selectMcc, setSelectMcc] = React.useState("");
   const [entityId, setEntityId] = React.useState("");
   const [entityName, setEntityName] = React.useState("");
   const [parentId, setParentId] = React.useState("");
 
-  useEffect(() => {
-    const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
-  }, [selectedInst]);
 
   const [NonActivityFeesPackageList, setNonActivityFeesPackageList] =
     React.useState<ActivityFeesPackage[]>([]);
@@ -476,7 +474,7 @@ const getEntitiesBySearchCriteria = async () => {
                       state: { institutionId: selectInstitutionVal },
                     })
                   }
-                  disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs)?.accessAdd === "1")}
+                  disabled={!canAdd}
                 >
                   {intl.formatMessage({
                     id: "NonActivityFeesPackage.addPackage",
@@ -572,7 +570,7 @@ const getEntitiesBySearchCriteria = async () => {
                                 <Button
                                   variant="contained"
                                   disableElevation
-                                  disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs)?.accessUpdate === "1")}
+                                  disabled={!canUpdate}
                                   className="btn-light sm rounded"
                                   onClick={() => handleClickOpen(row.packageId)}
                                 >
@@ -588,19 +586,19 @@ const getEntitiesBySearchCriteria = async () => {
                               className="custom"
                               checked={row.status === "1" ? true : false}
                               onChange={(e) => changeStatus(row.packageId, e)}
-                              disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs)?.accessUpdate === "1")}
+                              disabled={!canUpdate}
                             />
                             <IconButton
                               className="border-icon-btn no-border sm"
                               onClick={() => editHandler(row.packageId)}
-                              disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs)?.accessUpdate === "1")}
+                              disabled={!canUpdate}
                             >
                               <img src={edit_ic} alt="mail" />
                             </IconButton>
                             <IconButton
                               className="border-icon-btn no-border sm"
                               onClick={() => onDelete(row.packageId)}
-                              disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Non_Activity_Fees_Pkgs)?.accessDelete === "1")}
+                              disabled={!canDelete}
                             >
                               <img src={delete_ic} alt="mail" />
                             </IconButton>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import Button from "@mui/material/Button";
 import {
   add_rounded,
@@ -38,15 +38,16 @@ import { MerchantTransactionServices } from "../../services/entityManagement/mer
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import {
+  ConfigurationActivities,
   Errors,
   StatusCode,
   rowsPerPageOptionsConst,
   TRANS_USAGE,
   OptionType,
   ENTITY_LEVEL,
-  ROLE_ACTIVITY,
   CodePrefix,
 } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
@@ -65,8 +66,6 @@ import { TransactionUsageModel } from "../../models/configuration/TransactionGro
 import { TransactionGroupService } from "../../services/configuration/transaction-group-service";
 import { visuallyHidden } from "@mui/utils";
 import ReactSelect from "react-select";
-import { RoleMainModel } from "../../models/security/RoleModel";
-import { AssignRoles, selectedInst } from "../../services/request";
 import { InstitutionService } from "../../services/configuration/institution-service";
 
 function MerchantTransactionListing() {
@@ -96,7 +95,11 @@ function MerchantTransactionListing() {
     );
   const [filterApplied, setFilterApplied] = React.useState<boolean>(false);
   const [filterState, setFilterState] = React.useState<any>(null);
-  const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MANTRANS), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
 
   const [page, setPage] = React.useState(0);
   const [totalRecords, setTotalRecords] = React.useState(0);
@@ -113,14 +116,6 @@ function MerchantTransactionListing() {
 
   const outLetIdRequired = "Entity/OutletId is required.";
 
-  useEffect(() => {
-    const assignRole = AssignRoles.find(
-      (role: RoleMainModel) => role.instId === selectedInst
-    );
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
-  }, [selectedInst]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -558,20 +553,7 @@ function MerchantTransactionListing() {
                        state: { institutionId: selectInstitutionVal , isEdit:false } 
                     })
                   }
-                  disabled={
-                    !(
-                      roleActivity?.roleActivities.find(
-                        (act) =>
-                          act.activity?.activityDesc ===
-                          ROLE_ACTIVITY.Manual_Transactions
-                      ) &&
-                      roleActivity?.roleActivities.find(
-                        (act) =>
-                          act.activity?.activityDesc ===
-                          ROLE_ACTIVITY.Manual_Transactions
-                      )?.accessAdd === "1"
-                    )
-                  }
+                  disabled={!canAdd}
                 >
                   {intl.formatMessage({
                     id: "Entity.button.addTransaction",
@@ -1033,20 +1015,7 @@ function MerchantTransactionListing() {
                               onClick={() =>
                                 editTransaction(row.merchantTransactionId)
                               }
-                              disabled={
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Manual_Transactions
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Manual_Transactions
-                                  )?.accessUpdate === "1"
-                                )
-                              }
+                              disabled={!canUpdate}
                             >
                               <img src={edit_ic} alt="mail" />
                             </IconButton>
@@ -1055,20 +1024,7 @@ function MerchantTransactionListing() {
                               onClick={() =>
                                 onDelete(row.merchantTransactionId)
                               }
-                              disabled={
-                                !(
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Manual_Transactions
-                                  ) &&
-                                  roleActivity?.roleActivities.find(
-                                    (act) =>
-                                      act.activity?.activityDesc ===
-                                      ROLE_ACTIVITY.Manual_Transactions
-                                  )?.accessDelete === "1"
-                                )
-                              }
+                              disabled={!canDelete}
                             >
                               <img src={delete_ic} alt="mail" />
                             </IconButton>

@@ -12,18 +12,17 @@ import {
   Typography
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { add_rounded, delete_ic, edit_ic } from "../../assets/images";
 import { Institution } from "../../models/configuration/InstitutionModel";
-import { RoleMainModel } from "../../models/security/RoleModel";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { LoginService } from "../../services/login-service";
-import { AssignRoles, selectedInst } from "../../services/request";
-import { ApplicationLanguage, Errors, ROLE_ACTIVITY, StatusCode } from "../../utils/constant";
+import { ApplicationLanguage, ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
+import { getActivityPermissions } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS, setLocalStorage } from "../../utils/helper";
 import { visuallyHidden } from "@mui/utils";
 import { InstitutionControlService } from "../../services/configuration/institution-control-service";
@@ -33,7 +32,12 @@ function InstitutionsListing() {
   const intl = useIntl();
 
   const [institution, setInstitution] = useState<Institution[]>([]);
-  const [roleActivity, setRoleActivity] = useState<RoleMainModel>();
+
+  const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.INST), []);
+  const canAdd = perms.accessAdd === "1";
+  const canUpdate = perms.accessUpdate === "1";
+  const canDelete = perms.accessDelete === "1";
+  const canView = perms.accessView === "1";
 
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<keyof Institution>('institutionId');
@@ -72,14 +76,6 @@ function InstitutionsListing() {
   };
 
   /* END (sort table data) */
-
-  useEffect(() => {
-    const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-    //console.log("get role activity", assignRole);
-    if (assignRole !== undefined) {
-      setRoleActivity(assignRole);
-    }
-  }, [selectedInst]);
 
   useEffect(() => {
     getAllInstitute();
@@ -280,7 +276,7 @@ function InstitutionsListing() {
                   disableElevation
                   className="btn-light"
                   endIcon={<img src={add_rounded} alt="add" />}
-                  disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessAdd === "1")}
+                  disabled={!canAdd}
                 >
                   <FormattedMessage
                     id="Institution.addBtn"
@@ -382,19 +378,19 @@ function InstitutionsListing() {
                             className="custom"
                             checked={row.status === "1" ? true : false}
                             onChange={(e) => changeStatus(row.institutionId, e)}
-                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1")}
+                            disabled={!canUpdate}
                           />
                           <IconButton
                             className="border-icon-btn no-border sm"
                             onClick={() => editInstitute(row.institutionId)}
-                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1")}
+                            disabled={!canUpdate}
                           >
                             <img src={edit_ic} alt="mail" />
                           </IconButton>
                           <IconButton
                             className="border-icon-btn no-border sm"
                             onClick={() => onDelete(row.institutionId)}
-                            disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessDelete === "1")}
+                            disabled={!canDelete}
                           >
                             <img src={delete_ic} alt="mail" />
                           </IconButton>

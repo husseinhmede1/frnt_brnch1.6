@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormHelperText, Grid, IconButton, InputBase, MenuItem, Select, SelectChangeEvent, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl'
 import { useNavigate } from 'react-router';
@@ -9,11 +9,10 @@ import Swal from 'sweetalert2';
 import { add_rounded, delete_ic, down_arrow_icon, edit_ic, resetIcon } from '../../assets/images';
 import { Institution } from '../../models/configuration/InstitutionModel';
 import { SystemCodeModel, SystemHeaderCode } from '../../models/entityManagement/SystemCodeModel';
-import { RoleMainModel } from '../../models/security/RoleModel';
 import { InstitutionService } from '../../services/configuration/institution-service';
 import { SystemCodeServices } from '../../services/entityManagement/system-code-services';
-import { AssignRoles, selectedInst } from '../../services/request';
-import { Errors, ROLE_ACTIVITY, StatusCode } from '../../utils/constant';
+import { ConfigurationActivities, Errors, StatusCode } from '../../utils/constant';
+import { getActivityPermissions } from '../../utils/permissionUtils';
 import { getLocalStorage, LOCALSTORAGE_KEYS } from '../../utils/helper';
 import validations from '../../utils/validations';
 import { visuallyHidden } from "@mui/utils";
@@ -31,7 +30,12 @@ const SystemCodes = () => {
     const [institution, setInstitution] = useState<Institution[]>([]);
     const [saveInstitution, setSaveInstitution] = useState<Institution[]>([]);
     const [selectInst1, setSelectInst1] = React.useState<string>(" ");
-    const [roleActivity, setRoleActivity] = React.useState<RoleMainModel>();
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.SYS_CODES), []);
+    const canAdd = perms.accessAdd === "1";
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1";
+    const canView = perms.accessView === "1";
+
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof SystemCodeModel>('codePrefix');
     const [update, setUpdate] = React.useState<boolean>(false);
@@ -39,14 +43,6 @@ const SystemCodes = () => {
     const loginUser = JSON.parse(
         getLocalStorage(LOCALSTORAGE_KEYS.USER) as string
       );
-
-    useEffect(() => {
-        const assignRole = AssignRoles.find((role: RoleMainModel) => role.instId === selectedInst);
-        if (assignRole !== undefined) {
-            setRoleActivity(assignRole);
-        }
-    }, [selectedInst]);
-
 
     useEffect(() => {
         getActiveInstitution();
@@ -312,7 +308,7 @@ const SystemCodes = () => {
                                     disableElevation className="btn-light"
                                     endIcon={<img src={add_rounded} alt="add" />}
                                     onClick={() => handleClickOpen()}
-                                    disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.System_Codes) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.System_Codes)?.accessAdd === "1")}
+                                    disabled={!canAdd}
                                 >
                                     <FormattedMessage
                                         id="SystemCodes.addcode"
@@ -449,19 +445,19 @@ const SystemCodes = () => {
                                                         onChange={(e) =>
                                                             changeStatus(row.systemCodeId as number, e)
                                                         }
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.System_Codes) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.System_Codes)?.accessUpdate === "1")}
+                                                        disabled={!canUpdate}
                                                     /> */}
                                                     <IconButton
                                                         className="border-icon-btn no-border sm"
                                                         onClick={() => editSystemCode(row.systemCodeId)}
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.System_Codes) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.System_Codes)?.accessUpdate === "1")}
+                                                        disabled={!canUpdate}
                                                     >
                                                         <img src={edit_ic} alt="edit" />
                                                     </IconButton>
                                                     <IconButton
                                                         className="border-icon-btn no-border sm"
                                                         onClick={() => onDelete(row.systemCodeId as number)}
-                                                        disabled={!(roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.System_Codes) && roleActivity?.roleActivities.find(act => act.activity?.activityDesc === ROLE_ACTIVITY.System_Codes)?.accessDelete === "1")}
+                                                        disabled={!canDelete}
                                                     >
                                                         <img src={delete_ic} alt="delete" />
                                                     </IconButton>
