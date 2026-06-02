@@ -101,7 +101,7 @@ function Login() {
                         } catch (_) { /* non-critical */ }
 
                         toast.success("Successfully logged in");
-                        navigate("/dashboard");
+                        window.location.href = "/dashboard";
                     }
                 }
             })
