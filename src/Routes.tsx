@@ -102,8 +102,8 @@ import DesignerMakerCheckerConfiguration from "./pages/MakerCheckerConfiguration
 import { ConfigurationActivities } from "./utils/constant";
 
 // Shorthand helpers to keep JSX concise
-const AP = (code: string, child: React.ReactNode) => (
-    <ActivityProtectedRoute activityCode={code}>{child}</ActivityProtectedRoute>
+const AP = (code: string, child: React.ReactNode, accessType?: "view" | "add" | "update" | "delete") => (
+    <ActivityProtectedRoute activityCode={code} accessType={accessType}>{child}</ActivityProtectedRoute>
 );
 const PR = (child: React.ReactNode) => (
     <ProtectedRoute>{child}</ProtectedRoute>
@@ -185,31 +185,35 @@ function RouteList() {
             <Route path="/transaction-groups-listing"                   element={AP(ConfigurationActivities.TXN_GROUP,      <TransactionGroupsListing />)} />
             <Route path="/pending-activities"                           element={AP(ConfigurationActivities.APPRV_ENT,      <PendingActivities />)} />
 
-            {/* ── Definition / sub-pages: inherit parent auth, no extra activity check ── */}
-            <Route path="/institutions-definition"                      element={PR(<InstitutionsDefinition />)} />
-            <Route path="/institutions-definition/:id"                  element={PR(<InstitutionsDefinition />)} />
-            <Route path="/institutions-definition/:id/:institutionControlId" element={PR(<InstitutionsDefinition />)} />
-            <Route path="/card-scheme-definition"                       element={PR(<CardSchemeDefinition />)} />
-            <Route path="/card-scheme-definition/:id"                   element={PR(<CardSchemeDefinition />)} />
-            <Route path="/card-scheme-definition/:id/:recordSequenceNumber" element={PR(<CardSchemeDefinition />)} />
-            <Route path="/add-edit-filelayout"                          element={PR(<AddEditFileLayout />)} />
-            <Route path="/add-edit-filelayout/:layoutId"                element={PR(<AddEditFileLayout />)} />
-            <Route path="/activity-fees-packages-definition"            element={PR(<ActivityFeesPackageDefinition />)} />
-            <Route path="/activity-fees-packages-definition/:id"        element={PR(<ActivityFeesPackageDefinition />)} />
-            <Route path="/non-activity-fees-packages-definition"        element={PR(<NonActivityFeesPackagesDefinition />)} />
-            <Route path="/non-activity-fees-packages-definition/:id"    element={PR(<NonActivityFeesPackagesDefinition />)} />
-            <Route path="/entities-definition"                          element={PR(<EntitiesDefinition />)} />
-            <Route path="/entities-definition/:id"                      element={PR(<EntitiesDefinition />)} />
-            <Route path="/entities-definition-clone/:id"                element={PR(<EntitiesDefinition />)} />
-            <Route path="/merchant-transaction-definition"              element={PR(<MerchantTransacionDefinition />)} />
-            <Route path="/merchant-transaction-definition/:id"          element={PR(<MerchantTransacionDefinition />)} />
-            <Route path="/manual-non-activity-fees-transaction-definition"     element={PR(<ManualNonActivityFeesDefinition />)} />
-            <Route path="/manual-non-activity-fees-transaction-definition/:id" element={PR(<ManualNonActivityFeesDefinition />)} />
-            <Route path="/users-definition"                             element={PR(<UserDefinition />)} />
-            <Route path="/users-definition/:id"                         element={PR(<UserDefinition />)} />
-            <Route path="/user-profile/:id"                             element={PR(<UserDefinition />)} />
-            <Route path="/roles-definition"                             element={PR(<RoleDefinition />)} />
-            <Route path="/roles-definition/:id"                         element={PR(<RoleDefinition />)} />
+            {/* ── Definition / add / edit pages: activity-guarded with accessType ── */}
+            <Route path="/institutions-definition"                      element={AP(ConfigurationActivities.INST,           <InstitutionsDefinition />, "add")} />
+            <Route path="/institutions-definition/:id"                  element={AP(ConfigurationActivities.INST,           <InstitutionsDefinition />, "update")} />
+            <Route path="/institutions-definition/:id/:institutionControlId" element={AP(ConfigurationActivities.INST,      <InstitutionsDefinition />, "update")} />
+            <Route path="/card-scheme-definition"                       element={AP(ConfigurationActivities.CARDSCH,        <CardSchemeDefinition />, "add")} />
+            <Route path="/card-scheme-definition/:id"                   element={AP(ConfigurationActivities.CARDSCH,        <CardSchemeDefinition />, "update")} />
+            <Route path="/card-scheme-definition/:id/:recordSequenceNumber" element={AP(ConfigurationActivities.CARDSCH,    <CardSchemeDefinition />, "update")} />
+            <Route path="/add-edit-filelayout"                          element={AP(ConfigurationActivities.FILES_SCREEN,   <AddEditFileLayout />, "add")} />
+            <Route path="/add-edit-filelayout/:layoutId"                element={AP(ConfigurationActivities.FILES_SCREEN,   <AddEditFileLayout />, "update")} />
+            <Route path="/activity-fees-packages-definition"            element={AP(ConfigurationActivities.ACT_FEE_PKG,    <ActivityFeesPackageDefinition />, "add")} />
+            <Route path="/activity-fees-packages-definition/:id"        element={AP(ConfigurationActivities.ACT_FEE_PKG,    <ActivityFeesPackageDefinition />, "update")} />
+            <Route path="/non-activity-fees-packages-definition"        element={AP(ConfigurationActivities.NONACT_FEE_PKG, <NonActivityFeesPackagesDefinition />, "add")} />
+            <Route path="/non-activity-fees-packages-definition/:id"    element={AP(ConfigurationActivities.NONACT_FEE_PKG, <NonActivityFeesPackagesDefinition />, "update")} />
+            <Route path="/entities-definition"                          element={AP(ConfigurationActivities.ENTITIES,       <EntitiesDefinition />, "add")} />
+            <Route path="/entities-definition/:id"                      element={AP(ConfigurationActivities.ENTITIES,       <EntitiesDefinition />, "update")} />
+            <Route path="/entities-definition-clone/:id"                element={AP(ConfigurationActivities.ENTITIES,       <EntitiesDefinition />, "add")} />
+            <Route path="/merchant-transaction-definition"              element={AP(ConfigurationActivities.MANTRANS,       <MerchantTransacionDefinition />, "add")} />
+            <Route path="/merchant-transaction-definition/:id"          element={AP(ConfigurationActivities.MANTRANS,       <MerchantTransacionDefinition />, "update")} />
+            <Route path="/manual-non-activity-fees-transaction-definition"     element={AP(ConfigurationActivities.MNNONACTFEE, <ManualNonActivityFeesDefinition />, "add")} />
+            <Route path="/manual-non-activity-fees-transaction-definition/:id" element={AP(ConfigurationActivities.MNNONACTFEE, <ManualNonActivityFeesDefinition />, "update")} />
+            <Route path="/users-definition"                             element={AP(ConfigurationActivities.MNGUSERS,       <UserDefinition />, "add")} />
+            <Route path="/users-definition/:id"                         element={AP(ConfigurationActivities.MNGUSERS,       <UserDefinition />, "update")} />
+            <Route path="/user-profile/:id"                             element={AP(ConfigurationActivities.MNGUSERS,       <UserDefinition />, "view")} />
+            <Route path="/roles-definition"                             element={AP(ConfigurationActivities.MNGROLES,       <RoleDefinition />, "add")} />
+            <Route path="/roles-definition/:id"                         element={AP(ConfigurationActivities.MNGROLES,       <RoleDefinition />, "update")} />
+            <Route path="/job-definition"                               element={AP(ConfigurationActivities.SYS_CODES,      <JobDefinition />, "add")} />
+            <Route path="/job-definition/:id"                           element={AP(ConfigurationActivities.SYS_CODES,      <JobDefinition />, "update")} />
+
+            {/* ── Sub-detail pages: inherit parent auth, no own activity check ── */}
             <Route path="/issuer-profile"                               element={PR(<IssuerProfile />)} />
             <Route path="/range-definition"                             element={PR(<RangeDefinition />)} />
             <Route path="/range-definition/:id/:issuerAcqProfile"       element={PR(<RangeDefinition />)} />
@@ -234,8 +238,6 @@ function RouteList() {
             <Route path="/output-details/:id/:sumPerAccount/:merchantSubSummary/:outputFormat/:outputFileType/:institutionId/:instSubSummary" element={PR(<OutputFileTemplateDetails />)} />
             <Route path="/task-execution-log"                           element={PR(<TaskExecutionLog />)} />
             <Route path="/jobs"                                         element={PR(<Jobs />)} />
-            <Route path="/job-definition"                               element={PR(<JobDefinition />)} />
-            <Route path="/job-definition/:id"                           element={PR(<JobDefinition />)} />
             <Route path="/job-monitoring"                               element={PR(<JobMonitoring />)} />
             <Route path="/job-execution-log/:id"                        element={PR(<JobExecutionLog />)} />
             <Route path="/task-batch-size"                              element={PR(<TaskBatchSize />)} />
