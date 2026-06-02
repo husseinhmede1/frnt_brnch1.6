@@ -4,7 +4,7 @@ export enum LOCALSTORAGE_KEYS {
     DEFAULT_INSTITUTE = "DEFAULT_INSTITUTE",
     INSTITUTES = "INSTITUTES",
     ROLE_ACTIVITY = "ROLE_ACTIVITY",
-    MODULES = "modules"
+    MODULES = "MODULES"
 }
 
 const defaults = {

@@ -1,6 +1,9 @@
 import { AxiosResponse } from "axios";
 import request from "../request";
+
+
 import { EntityChangeStatusModel, EntityDefinitionModel, EntityLevelModel, EntityListByLevelModel,EntitySearchCriteria, EntityListModel, EntitySearchRequestModel, TransactionsMerchantList } from "../../models/entityManagement/EntityModel";
+
 import { BusinessTypeModel } from "../../models/configuration/BusinessTypeModel";
 import { PageResponseModel } from "../../models/configuration/PageResponseModel";
 
