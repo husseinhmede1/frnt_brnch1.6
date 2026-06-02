@@ -1,6 +1,7 @@
 export interface UrlModel {
     url: string;
     isMenu?: string;
+    accessRight?: string;  // e.g. "YNNNN" = View only, "YYYYYYY" = all access types
 }
 
 export interface ActivityModel {
