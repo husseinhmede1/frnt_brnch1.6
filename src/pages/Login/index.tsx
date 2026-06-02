@@ -102,7 +102,6 @@ function Login() {
 
                         toast.success("Successfully logged in");
                         navigate("/dashboard");
-                        window.location.reload();
                     }
                 }
             })
