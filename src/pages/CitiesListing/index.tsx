@@ -72,7 +72,9 @@ function CitiesListing() {
     const canUpdate = perms.accessUpdate === "1";
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CITY, 'DCITY');
     const canView = perms.accessView === "1";
-    const canLoadCountries = hasApiAccess(ConfigurationActivities.CITY, 'GACOENTRY');
+    const canLoadCountries  = hasApiAccess(ConfigurationActivities.CITY, 'GACOENTRY');
+    const canLoadCities     = hasApiAccess(ConfigurationActivities.CITY, 'GACITY');
+    const canLoadProvinces  = hasApiAccess(ConfigurationActivities.CITY, 'SPROVINCE');
 
     const handleClose = () => {
         setOpen(false);
@@ -94,6 +96,7 @@ function CitiesListing() {
       .catch((err) =>   toast.error(err.response.data.errors[0]));
   };
   const getAllProvince = async () => {
+    if (!canLoadProvinces) return;
     await ProvinceService.getAllProvince()
       .then((res) => {
         setProvinceList([...res.data]);
@@ -101,6 +104,7 @@ function CitiesListing() {
       .catch((err) =>   toast.error(err.response.data.errors[0]));
   };
   const getAllCity = async () => {
+    if (!canLoadCities) return;
     await CityService.getAllCity()
       .then((res) => {
         setCities([...res.data]);
