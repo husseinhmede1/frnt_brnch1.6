@@ -52,7 +52,7 @@ import Swal from "sweetalert2";
 import moment from "moment";
 import { visuallyHidden } from "@mui/utils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 
 function CurrencyRate() {
   const [open, setOpen] = React.useState(false);
@@ -76,10 +76,12 @@ function CurrencyRate() {
     const intl = useIntl();
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CRNCY_RATE), []);
-    const canAdd = perms.accessAdd === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.CRNCY_RATE, 'CVRTCRT');
     const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CRNCY_RATE, 'CVRTDEL');
     const canView = perms.accessView === "1";
+    const canLoadInstitutions = hasApiAccess(ConfigurationActivities.CRNCY_RATE, 'GAAINST');
+    const canLoadCurrencies = hasApiAccess(ConfigurationActivities.CRNCY_RATE, 'GACURRENCY');
 
   const firstUpdate = useRef(true);
 
@@ -136,6 +138,7 @@ function CurrencyRate() {
   };
 
   const getActiveCurrencies = async () => {
+    if (!canLoadCurrencies) return;
     await CurrencyService.getActiveCurrencies()
       .then((res) => {
         setCurrencyList([...res.data]);
@@ -144,6 +147,7 @@ function CurrencyRate() {
   };
 
   const getActiveInstitution = async () => {
+    if (!canLoadInstitutions) return;
     await InstitutionService.getActiveInstitution()
       .then((res) => {
         setInstitution([...res.data]);

@@ -45,7 +45,7 @@ import { InstitutionService } from "../../services/configuration/institution-ser
 import { RoleMasterService } from "../../services/configuration/role-master-service";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
 import { CodePrefix, ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import validations from "../../utils/validations";
 import { visuallyHidden } from "@mui/utils";
@@ -66,10 +66,11 @@ function Employees() {
     const intl = useIntl();
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.EMPLOYEES), []);
-    const canAdd = perms.accessAdd === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.EMPLOYEES, 'EMPCRT');
     const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.EMPLOYEES, 'EMPDEL');
     const canView = perms.accessView === "1";
+    const canLoadInstitutions = hasApiAccess(ConfigurationActivities.EMPLOYEES, 'GAAINST');
 
     const [order, setOrder] = useState<Order>('asc');
     const [orderBy, setOrderBy] = useState<keyof EmployeeModel>('employeeId');
@@ -155,6 +156,7 @@ function Employees() {
     };
 
     const getActiveInstitution = async () => {
+        if (!canLoadInstitutions) return;
         await InstitutionService.getActiveInstitution()
             .then((res) => {
                 setInstitution([...res.data]);

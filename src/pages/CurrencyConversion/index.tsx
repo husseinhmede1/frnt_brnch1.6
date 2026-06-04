@@ -43,7 +43,7 @@ import { CurrencyModel } from "../../models/configuration/CurrencyModel";
 import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import validations from "../../utils/validations";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 
 function CurrencyConversion() {
   const intl = useIntl();
@@ -58,10 +58,12 @@ function CurrencyConversion() {
     const [selectInstitutionVal, setSelectInstitutionVal] = React.useState("");
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CRNCY_CONV), []);
-    const canAdd = perms.accessAdd === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.CRNCY_CONV, 'CVCNCRT');
     const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CRNCY_CONV, 'CVCNDEL');
     const canView = perms.accessView === "1";
+    const canLoadInstitutions = hasApiAccess(ConfigurationActivities.CRNCY_CONV, 'GAAINST');
+    const canLoadCurrencies = hasApiAccess(ConfigurationActivities.CRNCY_CONV, 'GACURRENCY');
 
   const handleClickOpen = (isEdited: boolean) => {
     if (!isEdited) {
@@ -105,6 +107,7 @@ function CurrencyConversion() {
   };
 
   const getActiveInstitution = async () => {
+    if (!canLoadInstitutions) return;
     await InstitutionService.getActiveInstitution()
       .then((res) => {
         setInstitution([...res.data]);
@@ -113,6 +116,7 @@ function CurrencyConversion() {
   };
 
   const getActiveCurrencies = async () => {
+    if (!canLoadCurrencies) return;
     await CurrencyService.getActiveCurrencies()
       .then((res) => {
         setCurrencies([...res.data]);

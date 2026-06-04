@@ -19,7 +19,7 @@ import { add_rounded, delete_ic, edit_ic } from "../../assets/images";
 import { CardSchemeModel } from "../../models/configuration/CardSchemeModel";
 import { CardSchemeService } from "../../services/configuration/card-scheme-service";
 import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 
 function CardScheme() {
     const navigate = useNavigate();
@@ -28,9 +28,9 @@ function CardScheme() {
     const [CardSchemes, setCardSchemes] = useState<CardSchemeModel[]>([]);
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CARDSCH), []);
-    const canAdd = perms.accessAdd === "1";
-    const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.CARDSCH, 'SCSCHEME');
+    const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.CARDSCH, 'SCSCHEMESC');
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CARDSCH, 'DCSCHEME');
     const canView = perms.accessView === "1";
 
     useEffect(() => {

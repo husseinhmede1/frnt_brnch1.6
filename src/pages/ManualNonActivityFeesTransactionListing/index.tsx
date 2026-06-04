@@ -51,7 +51,7 @@ import {
   ENTITY_LEVEL,
   CodePrefix,
 } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validations from "../../utils/validations";
@@ -102,9 +102,9 @@ function ManualNonActivityFeesListing() {
   const [outletErr, setOutletErr] = React.useState("");
 
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNNONACTFEE), []);
-  const canAdd = perms.accessAdd === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.MNNONACTFEE, 'SMNATX');
   const canUpdate = perms.accessUpdate === "1";
-  const canDelete = perms.accessDelete === "1";
+  const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MNNONACTFEE, 'DMNATX');
   const canView = perms.accessView === "1";
 
   const outLetIdRequired = "Entity/OutletId is required.";

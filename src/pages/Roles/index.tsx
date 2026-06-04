@@ -9,7 +9,7 @@ import { RoleMainModel, RoleModel } from '../../models/security/RoleModel';
 import { RoleService } from '../../services/security/role-service';
 import { ConfigurationActivities, Errors, rowsPerPageOptionsConst, StatusCode } from '../../utils/constant';
 import { visuallyHidden } from "@mui/utils";
-import { getActivityPermissions } from '../../utils/permissionUtils';
+import { getActivityPermissions, hasApiAccess } from '../../utils/permissionUtils';
 import { getLocalStorage, LOCALSTORAGE_KEYS } from '../../utils/helper';
 
 const Roles = () => {
@@ -20,9 +20,9 @@ const Roles = () => {
     const [searchTerm, setSearchTerm] = React.useState("");
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNGROLES), []);
-    const canAdd = perms.accessAdd === "1";
-    const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.MNGROLES, 'SAVEROLE');
+    const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.MNGROLES, 'ROLECHNGSTTS');
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MNGROLES, 'DELETEROLE');
     const canView = perms.accessView === "1";
 
     const userStr = getLocalStorage(LOCALSTORAGE_KEYS.USER);

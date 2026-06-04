@@ -12,7 +12,7 @@ import { SystemCodeModel, SystemHeaderCode } from '../../models/entityManagement
 import { InstitutionService } from '../../services/configuration/institution-service';
 import { SystemCodeServices } from '../../services/entityManagement/system-code-services';
 import { ConfigurationActivities, Errors, StatusCode } from '../../utils/constant';
-import { getActivityPermissions } from '../../utils/permissionUtils';
+import { getActivityPermissions, hasApiAccess } from '../../utils/permissionUtils';
 import { getLocalStorage, LOCALSTORAGE_KEYS } from '../../utils/helper';
 import validations from '../../utils/validations';
 import { visuallyHidden } from "@mui/utils";
@@ -31,10 +31,11 @@ const SystemCodes = () => {
     const [saveInstitution, setSaveInstitution] = useState<Institution[]>([]);
     const [selectInst1, setSelectInst1] = React.useState<string>(" ");
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.SYS_CODES), []);
-    const canAdd = perms.accessAdd === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.SYS_CODES, 'SYSCDCRT');
     const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.SYS_CODES, 'SYSCDDEL');
     const canView = perms.accessView === "1";
+    const canLoadInstitutions = hasApiAccess(ConfigurationActivities.SYS_CODES, 'GAAINST');
 
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof SystemCodeModel>('codePrefix');
@@ -88,6 +89,7 @@ const SystemCodes = () => {
     };
 
     const getActiveInstitution = async () => {
+        if (!canLoadInstitutions) return;
         await InstitutionService.getActiveInstitution()
             .then((res) => {
                 setInstitution([...res.data]);

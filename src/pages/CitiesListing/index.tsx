@@ -42,7 +42,7 @@ import { CityModel } from "../../models/configuration/CityModel";
 import { CityService } from "../../services/configuration/city-service";
 import { CurrencyService } from "../../services/configuration/currency-service";
 import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import validations from "../../utils/validations";
 import { CountryModel } from "../../models/configuration/CountryModel";
 import { CountryService } from "../../services/configuration/country-service";
@@ -68,10 +68,11 @@ function CitiesListing() {
     const intl = useIntl();
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CITY), []);
-    const canAdd = perms.accessAdd === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.CITY, 'SCITY');
     const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CITY, 'DCITY');
     const canView = perms.accessView === "1";
+    const canLoadCountries = hasApiAccess(ConfigurationActivities.CITY, 'GACOENTRY');
 
     const handleClose = () => {
         setOpen(false);
@@ -85,6 +86,7 @@ function CitiesListing() {
   }, []);
 
   const getAllCountry = async () => {
+    if (!canLoadCountries) return;
     await CountryService.getActiveCountries()
       .then((res) => {
         setCountryList([...res.data]);

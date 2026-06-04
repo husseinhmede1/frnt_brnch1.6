@@ -22,7 +22,7 @@ import { Institution } from "../../models/configuration/InstitutionModel";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { LoginService } from "../../services/login-service";
 import { ApplicationLanguage, ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS, setLocalStorage } from "../../utils/helper";
 import { visuallyHidden } from "@mui/utils";
 import { InstitutionControlService } from "../../services/configuration/institution-control-service";
@@ -34,9 +34,9 @@ function InstitutionsListing() {
   const [institution, setInstitution] = useState<Institution[]>([]);
 
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.INST), []);
-  const canAdd = perms.accessAdd === "1";
-  const canUpdate = perms.accessUpdate === "1";
-  const canDelete = perms.accessDelete === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.INST, 'SINST');
+  const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.INST, 'SINSTSC');
+  const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.INST, 'DINST');
   const canView = perms.accessView === "1";
 
   const [order, setOrder] = useState<Order>('asc');

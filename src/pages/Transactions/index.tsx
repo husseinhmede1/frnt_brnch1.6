@@ -13,7 +13,7 @@ import { TransactionsModel } from '../../models/entityManagement/TransactionMode
 import { TransactionService } from '../../services/configuration/transaction-service';
 import { SystemCodeServices } from '../../services/entityManagement/system-code-services';
 import { CodePrefix, CodeSuffix, ConfigurationActivities, Errors, StatusCode } from '../../utils/constant';
-import { getActivityPermissions } from '../../utils/permissionUtils';
+import { getActivityPermissions, hasApiAccess } from '../../utils/permissionUtils';
 import { getLocalStorage, LOCALSTORAGE_KEYS } from '../../utils/helper';
 import validations from '../../utils/validations';
 import { avoidSpace } from '../../utils/commonfunction';
@@ -30,6 +30,7 @@ const Transactions = () => {
     const canUpdate = perms.accessUpdate === "1";
     const canDelete = perms.accessDelete === "1";
     const canView = perms.accessView === "1";
+    const canLoadInstitutions = hasApiAccess(ConfigurationActivities.TRNINQ, 'GAAINST');
 
     const [usageList, setUsageList] = React.useState<SystemCodeModel[]>([]);
     const [trasUsage, setTransUsage] = React.useState<string>(" ");

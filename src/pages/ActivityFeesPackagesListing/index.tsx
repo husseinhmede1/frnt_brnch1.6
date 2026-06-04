@@ -49,7 +49,7 @@ import { ActivityFeesPackagesService } from "../../services/configuration/activi
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { EntityService } from "../../services/entityManagement/entity-service";
 import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import { visuallyHidden } from "@mui/utils";
 import { MccModel } from "../../models/configuration/MccModel";
@@ -77,10 +77,13 @@ function ActivityFeesPackagesListing() {
   const [selectedPackageId, setSelectedPackageId] = React.useState<number>();
   const [fieldKey, setFieldKey] = React.useState<number>(0);
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.ACT_FEE_PKG), []);
-  const canAdd = perms.accessAdd === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.ACT_FEE_PKG, 'ACTPKCRT');
   const canUpdate = perms.accessUpdate === "1";
   const canDelete = perms.accessDelete === "1";
   const canView = perms.accessView === "1";
+  const canLoadInstitutions = hasApiAccess(ConfigurationActivities.ACT_FEE_PKG, 'GAAINST');
+  const canLoadCurrencies = hasApiAccess(ConfigurationActivities.ACT_FEE_PKG, 'GACURRENCY');
+  const canLoadCardSchemes = hasApiAccess(ConfigurationActivities.ACT_FEE_PKG, 'GACSSCHEME');
 
   const [mccList, setMccList] = React.useState<MccModel[]>([]);
   const [selectMcc, setSelectMcc] = React.useState("");
@@ -160,6 +163,7 @@ function ActivityFeesPackagesListing() {
   }, []);
 
   const getAllInstitutionList = async () => {
+    if (!canLoadInstitutions) return;
     await InstitutionService.getActiveInstitution()
       .then((res) => {
         setInstitutionList([...res.data]);

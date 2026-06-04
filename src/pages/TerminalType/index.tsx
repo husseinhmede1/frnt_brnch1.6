@@ -31,7 +31,7 @@ import {
 import { TerminalTypeModel } from "../../models/configuration/TerminalTypeModel";
 import { TerminalTypeService } from "../../services/configuration/terminal-type-service";
 import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import validations from "../../utils/validations";
 
 function TerminalType() {
@@ -47,9 +47,9 @@ function TerminalType() {
     const intl = useIntl();
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.TERM_TYPE), []);
-    const canAdd = perms.accessAdd === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.TERM_TYPE, 'TRMTPCRT');
     const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.TERM_TYPE, 'TRMTPDEL');
     const canView = perms.accessView === "1";
 
   const {

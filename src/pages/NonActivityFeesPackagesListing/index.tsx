@@ -49,7 +49,7 @@ import { InstitutionService } from "../../services/configuration/institution-ser
 import { NonActivityFeesPackagesService } from "../../services/configuration/nonactivity-fee-service";
 import { EntityService } from "../../services/entityManagement/entity-service";
 import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import { visuallyHidden } from "@mui/utils";
 import { MccModel } from "../../models/configuration/MccModel";
@@ -75,10 +75,11 @@ function NonActivityFeesPackagesListing() {
   const [selectedPackageId, setSelectedPackageId] = React.useState<string>();
   const [fieldKey, setFieldKey] = React.useState<number>(0);
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.NONACT_FEE_PKG), []);
-  const canAdd = perms.accessAdd === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.NONACT_FEE_PKG, 'NACTPKCR');
   const canUpdate = perms.accessUpdate === "1";
-  const canDelete = perms.accessDelete === "1";
+  const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.NONACT_FEE_PKG, 'NACTPKDL');
   const canView = perms.accessView === "1";
+  const canLoadInstitutions = hasApiAccess(ConfigurationActivities.NONACT_FEE_PKG, 'GAAINST');
 
   const [mccList, setMccList] = React.useState<MccModel[]>([]);
   const [selectMcc, setSelectMcc] = React.useState("");
@@ -153,6 +154,7 @@ function NonActivityFeesPackagesListing() {
   }, []);
 
   const getAllInstitutionList = async () => {
+    if (!canLoadInstitutions) return;
     await InstitutionService.getActiveInstitution()
       .then((res) => {
         setInstitutionList([...res.data]);

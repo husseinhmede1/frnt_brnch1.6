@@ -47,7 +47,7 @@ import {
   ENTITY_LEVEL,
   CodePrefix,
 } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
@@ -96,7 +96,7 @@ function MerchantTransactionListing() {
   const [filterApplied, setFilterApplied] = React.useState<boolean>(false);
   const [filterState, setFilterState] = React.useState<any>(null);
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MANTRANS), []);
-  const canAdd = perms.accessAdd === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.MANTRANS, 'SMMTX');
   const canUpdate = perms.accessUpdate === "1";
   const canDelete = perms.accessDelete === "1";
   const canView = perms.accessView === "1";

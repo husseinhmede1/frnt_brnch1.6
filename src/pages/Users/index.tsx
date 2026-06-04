@@ -40,7 +40,7 @@ import {
   StatusCode,
   rowsPerPageOptionsConst,
 } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { visuallyHidden } from "@mui/utils";
 import { Institution } from "../../models/configuration/InstitutionModel";
 import { InstitutionService } from "../../services/configuration/institution-service";
@@ -62,10 +62,12 @@ function Users() {
   const intl = useIntl();
 
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNGUSERS), []);
-  const canAdd = perms.accessAdd === "1";
-  const canUpdate = perms.accessUpdate === "1";
-  const canDelete = perms.accessDelete === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'SAVEUSER');
+  const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'USERCHNGSTTS');
+  const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'DELETEUSER');
   const canView = perms.accessView === "1";
+  const canLoadInstitutions = hasApiAccess(ConfigurationActivities.MNGUSERS, 'GAAINST');
+  const canLoadRoles = hasApiAccess(ConfigurationActivities.MNGUSERS, 'GETALLROLES');
 
   /* START (sort table data) */
   function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -119,6 +121,7 @@ function Users() {
   };
 
   const getActiveInstitution = async () => {
+    if (!canLoadInstitutions) return;
     await InstitutionService.getActiveInstitution()
       .then((res) => {
         setInstitution([...res.data]);

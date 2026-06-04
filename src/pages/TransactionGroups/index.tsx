@@ -35,7 +35,7 @@ import { TransactionGroupModel, TransactionsModel } from "../../models/configura
 import { TransactionGroupService } from "../../services/configuration/transaction-group-service";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
 import { CodePrefix, ConfigurationActivities, Errors, StatusCode, TRANS_USAGE } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import validations from "../../utils/validations";
 
@@ -71,9 +71,9 @@ function TransactionGroupsListing() {
   const intl = useIntl();
 
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.TXN_GROUP), []);
-  const canAdd = perms.accessAdd === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.TXN_GROUP, 'TXGRPCRT');
   const canUpdate = perms.accessUpdate === "1";
-  const canDelete = perms.accessDelete === "1";
+  const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.TXN_GROUP, 'TXGRPDEL');
   const canView = perms.accessView === "1";
 
   const {

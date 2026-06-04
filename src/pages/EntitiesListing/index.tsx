@@ -9,7 +9,7 @@ import { EntityLevelModel, EntityListModel, EntitySearchCriteria, EntitySearchRe
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { ConfigurationActivities, Errors, StatusCode, rowsPerPageOptionsConst, CodePrefix } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { visuallyHidden } from "@mui/utils";
 import { Institution } from "../../models/configuration/InstitutionModel";
 import { InstitutionService } from "../../services/configuration/institution-service";
@@ -35,10 +35,11 @@ function EntitiesListing() {
   const intl = useIntl();
 
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.ENTITIES), []);
-  const canAdd = perms.accessAdd === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.ENTITIES, 'ENTSRCH');
   const canUpdate = perms.accessUpdate === "1";
-  const canDelete = perms.accessDelete === "1";
+  const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.ENTITIES, 'ENTDEL');
   const canView = perms.accessView === "1";
+  const canLoadInstitutions = hasApiAccess(ConfigurationActivities.ENTITIES, 'GAAINST');
   const [businessTypeList, setBusinessTypeList] = React.useState<
     SystemCodeModel[]
   >([]);
@@ -129,6 +130,7 @@ function EntitiesListing() {
   }
 
   const getActiveInstitution = async () => {
+    if (!canLoadInstitutions) return;
     await InstitutionService.getActiveInstitution()
       .then((res) => {
         setInstitution([...res.data]);

@@ -38,7 +38,7 @@ import { CurrencyModel } from "../../models/configuration/CurrencyModel";
 import { CountryService } from "../../services/configuration/country-service";
 import { CurrencyService } from "../../services/configuration/currency-service";
 import { ConfigurationActivities, Errors, StatusCode } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import validations from "../../utils/validations";
 
 function CountriesListing() {
@@ -63,10 +63,11 @@ function CountriesListing() {
     const intl = useIntl();
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CNTRY), []);
-    const canAdd = perms.accessAdd === "1";
-    const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'SCOUNTRY');
+    const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'SCOUNTRYSC');
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'DCOUNTRY');
     const canView = perms.accessView === "1";
+    const canLoadCurrencies = hasApiAccess(ConfigurationActivities.CNTRY, 'GACURRENCY');
 
     const handleClose = () => {
         setOpen(false);

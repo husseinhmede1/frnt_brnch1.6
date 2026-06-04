@@ -42,6 +42,26 @@ export function getActivityPermissions(activityCode: string): ActivityPermission
 }
 
 /**
+ * Check if a specific API code is available for the given activity.
+ * Used to enable/disable individual buttons and dropdowns.
+ *
+ * Examples:
+ *   hasApiAccess('MCC', 'SMCC')       → can the user call the MCC create API?
+ *   hasApiAccess('MCC', 'DMCC')       → can the user call the MCC delete API?
+ *   hasApiAccess('MCC', 'GACSSCHEME') → should the card-scheme dropdown load?
+ */
+export function hasApiAccess(activityCode: string, apiCode: string): boolean {
+    try {
+        const raw = getLocalStorage(LOCALSTORAGE_KEYS.MODULES);
+        if (!raw) return false;
+        const activities: ActivityPermissionModel[] = JSON.parse(raw);
+        const act = activities.find(a => a.activityCode === activityCode);
+        return act?.urls?.some(u => u.apiCode === apiCode) ?? false;
+    } catch {}
+    return false;
+}
+
+/**
  * Returns all activities where accessView = "1" — used by the Sidebar
  * to decide which menu items to show.
  */

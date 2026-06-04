@@ -49,7 +49,7 @@ import {
   CodePrefix,
 } from "../../utils/constant";
 import { visuallyHidden } from "@mui/utils";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { SystemCodeModel } from "../../models/entityManagement/SystemCodeModel";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
@@ -84,10 +84,12 @@ function Mcc() {
   const intl = useIntl();
 
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MCC_SCREEN), []);
-  const canAdd = perms.accessAdd === "1";
+  const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'SMCC');
   const canUpdate = perms.accessUpdate === "1";
-  const canDelete = perms.accessDelete === "1";
+  const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'DMCC');
   const canView = perms.accessView === "1";
+  const canLoadCardSchemes = hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'GACSSCHEME');
+  const canLoadSystemCodes = hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'SPRFXSUFX');
 
   const handleClickOpen = (isEdit: boolean) => {
     if (!isEdit) {
@@ -164,6 +166,7 @@ function Mcc() {
   };
 
   const getAllCardScheme = async () => {
+    if (!canLoadCardSchemes) return;
     await MccService.getAllCardScheme()
       .then((res) => {
         setCardSchemeList([...res.data]);
@@ -172,6 +175,7 @@ function Mcc() {
   };
 
   const getAllMerchantTypes = async () => {
+    if (!canLoadSystemCodes) return;
     const model = {
       codePrefix: CodePrefix.MERCHANT_TYPE,
     };
