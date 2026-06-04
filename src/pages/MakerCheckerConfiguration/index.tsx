@@ -31,7 +31,7 @@ import { CustomeComparator, getValues } from "../../utils/commonfunction";
 import { APiService } from "../../services/services/api-service";
 import { APIListModel, ApiModel } from "../../models/configuration/ScopeModel";
 import { ConfigurationActivities, StatusCode, rowsPerPageOptions } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { FormattedMessage, useIntl } from "react-intl";
 
 const ArrowDown = () => (
@@ -61,7 +61,10 @@ function DesignerMakerCheckerConfiguration() {
     () => getActivityPermissions(ConfigurationActivities.MAKER_CHECKER),
     []
   );
-  const canUpdate = perms.accessUpdate === "1";
+  const canUpdate        = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.MAKER_CHECKER, 'MKCUPD');
+  const canLoadObjects   = hasApiAccess(ConfigurationActivities.MAKER_CHECKER, 'MKCOBJ');
+  const canLoadList      = hasApiAccess(ConfigurationActivities.MAKER_CHECKER, 'MKCLIST');
+  const canLoadListByObj = hasApiAccess(ConfigurationActivities.MAKER_CHECKER, 'MKCOBJL');
 
   const handleChangePage = useCallback((_: unknown, newPage: number) => {
     setPage(newPage);
@@ -95,6 +98,9 @@ function DesignerMakerCheckerConfiguration() {
       };
 
       try {
+        if (objectName && !canLoadListByObj) return;
+        if (!objectName && !canLoadList) return;
+
         const response = objectName
           ? await APiService.getApiList(payload, objectName)
           : await APiService.getAllApiList(payload);
@@ -119,6 +125,7 @@ function DesignerMakerCheckerConfiguration() {
   );
 
   const loadObjectNames = useCallback(async () => {
+    if (!canLoadObjects) return;
     try {
       const response = await APiService.getApiObjects();
       setObjectNameList(response.data ?? []);
