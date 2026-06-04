@@ -27,6 +27,7 @@ export class Activity {
   accessDelete!: string;
   accessUpdate!: string;
   accessView!: string;
+  accessChecker!: string;
   activityApi!: ActivityAPI[];
   activityCode!: string;
   activityDesc!: string;
@@ -45,6 +46,7 @@ export class roleActivities {
   accessDelete?: string;
   accessUpdate?: string;
   accessView?: string;
+  accessChecker?: string;
   activity?: Activity;
   roleActivityId?: number;
 }

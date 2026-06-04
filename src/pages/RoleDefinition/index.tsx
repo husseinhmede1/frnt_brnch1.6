@@ -61,6 +61,7 @@ const RoleDefinition = () => {
             res.data?.roleActivities.forEach(act => privilege.push({
                 accessAdd: act.accessAdd as string,
                 accessDelete: act.accessDelete as string,
+                accessChecker: act.accessChecker as string,
                 accessUpdate: act.accessUpdate as string,
                 accessView: act.accessView as string,
                 activityApi: act.activity?.activityApi as ActivityAPI[],
@@ -82,7 +83,8 @@ const RoleDefinition = () => {
 
     const getActivityList = () => {
         ActivityService.getAllActivities().then(res => {
-            setAssignprivilege([...res.data]);
+            const withChecker = res.data.map((act: any) => ({ ...act, accessChecker: act.accessChecker ?? "0" }));
+            setAssignprivilege([...withChecker]);
         })
     }
 
@@ -95,6 +97,7 @@ const RoleDefinition = () => {
                 Privilege[index].accessAdd = "0";
                 Privilege[index].accessUpdate = "0";
                 Privilege[index].accessDelete = "0";
+                Privilege[index].accessChecker = "0";
             }
         } else if (accessType === 'accessAdd') {
             Privilege[index].accessAdd = Privilege[index].accessAdd === '1' ? '0' : '1';
@@ -110,6 +113,11 @@ const RoleDefinition = () => {
         } else if (accessType === 'accessDelete') {
             Privilege[index].accessDelete = Privilege[index].accessDelete === '1' ? '0' : '1';
             if(Privilege[index].accessDelete === '1'){
+                Privilege[index].accessView = "1";
+            }
+        } else if (accessType === 'accessChecker') {
+            Privilege[index].accessChecker = Privilege[index].accessChecker === '1' ? '0' : '1';
+            if (Privilege[index].accessChecker === '1') {
                 Privilege[index].accessView = "1";
             }
         }
@@ -254,6 +262,10 @@ const RoleDefinition = () => {
                                                                 id: "Roles.delete",
                                                                 defaultMessage: "Delete",
                                                             })}</TableCell>
+                                                            <TableCell align="center" width="40px">{intl.formatMessage({
+                                                                id: "Roles.checker",
+                                                                defaultMessage: "Checker",
+                                                            })}</TableCell>
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
@@ -296,6 +308,15 @@ const RoleDefinition = () => {
                                                                         onChange={() => changeAssignPrivilege(row.activityId, 'accessDelete')}
                                                                     />
                                                                 </TableCell>
+                                                                <TableCell className='role-cell'>
+                                                                    <Checkbox
+                                                                        icon={<img src={ic_check} alt="" />}
+                                                                        disabled={isSystemAdminRole}
+                                                                        checkedIcon={<img src={ic_checked} alt="" />}
+                                                                        checked={row.accessChecker === '1'}
+                                                                        onChange={() => changeAssignPrivilege(row.activityId, 'accessChecker')}
+                                                                    />
+                                                                </TableCell>
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
@@ -330,6 +351,10 @@ const RoleDefinition = () => {
                                                             <TableCell align="center" width="40px">{intl.formatMessage({
                                                                 id: "Roles.delete",
                                                                 defaultMessage: "Delete",
+                                                            })}</TableCell>
+                                                            <TableCell align="center" width="40px">{intl.formatMessage({
+                                                                id: "Roles.checker",
+                                                                defaultMessage: "Checker",
                                                             })}</TableCell>
                                                         </TableRow>
                                                     </TableHead>
@@ -373,6 +398,15 @@ const RoleDefinition = () => {
                                                                         onChange={() => changeAssignPrivilege(row.activityId, 'accessDelete')}
                                                                     />
                                                                 </TableCell>
+                                                                <TableCell className='role-cell'>
+                                                                    <Checkbox
+                                                                        icon={<img src={ic_check} alt="" />}
+                                                                        disabled={isSystemAdminRole}
+                                                                        checkedIcon={<img src={ic_checked} alt="" />}
+                                                                        checked={row.accessChecker === '1'}
+                                                                        onChange={() => changeAssignPrivilege(row.activityId, 'accessChecker')}
+                                                                    />
+                                                                </TableCell>
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
@@ -407,6 +441,10 @@ const RoleDefinition = () => {
                                                             <TableCell align="center" width="40px">{intl.formatMessage({
                                                                 id: "Roles.delete",
                                                                 defaultMessage: "Delete",
+                                                            })}</TableCell>
+                                                            <TableCell align="center" width="40px">{intl.formatMessage({
+                                                                id: "Roles.checker",
+                                                                defaultMessage: "Checker",
                                                             })}</TableCell>
                                                         </TableRow>
                                                     </TableHead>
@@ -450,6 +488,15 @@ const RoleDefinition = () => {
                                                                         onChange={() => changeAssignPrivilege(row.activityId, 'accessDelete')}
                                                                     />
                                                                 </TableCell>
+                                                                <TableCell className='role-cell'>
+                                                                    <Checkbox
+                                                                        icon={<img src={ic_check} alt="" />}
+                                                                        disabled={isSystemAdminRole}
+                                                                        checkedIcon={<img src={ic_checked} alt="" />}
+                                                                        checked={row.accessChecker === '1'}
+                                                                        onChange={() => changeAssignPrivilege(row.activityId, 'accessChecker')}
+                                                                    />
+                                                                </TableCell>
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
@@ -484,6 +531,10 @@ const RoleDefinition = () => {
                                                             <TableCell align="center" width="40px">{intl.formatMessage({
                                                                 id: "Roles.delete",
                                                                 defaultMessage: "Delete",
+                                                            })}</TableCell>
+                                                            <TableCell align="center" width="40px">{intl.formatMessage({
+                                                                id: "Roles.checker",
+                                                                defaultMessage: "Checker",
                                                             })}</TableCell>
                                                         </TableRow>
                                                     </TableHead>
@@ -525,6 +576,15 @@ const RoleDefinition = () => {
                                                                         checkedIcon={<img src={ic_checked} alt="" />}
                                                                         checked={row.accessDelete === '1' ? true : false}
                                                                         onChange={() => changeAssignPrivilege(row.activityId, 'accessDelete')}
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell className='role-cell'>
+                                                                    <Checkbox
+                                                                        icon={<img src={ic_check} alt="" />}
+                                                                        disabled={isSystemAdminRole}
+                                                                        checkedIcon={<img src={ic_checked} alt="" />}
+                                                                        checked={row.accessChecker === '1'}
+                                                                        onChange={() => changeAssignPrivilege(row.activityId, 'accessChecker')}
                                                                     />
                                                                 </TableCell>
                                                             </TableRow>
