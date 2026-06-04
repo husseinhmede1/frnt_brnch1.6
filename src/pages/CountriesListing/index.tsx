@@ -67,6 +67,7 @@ function CountriesListing() {
     const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'SCOUNTRYSC');
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'DCOUNTRY');
     const canView = perms.accessView === "1";
+    const canLoadCountries  = hasApiAccess(ConfigurationActivities.CNTRY, 'GACOUNTRY');
     const canLoadCurrencies = hasApiAccess(ConfigurationActivities.CNTRY, 'GACURRENCY');
 
     const handleClose = () => {
@@ -79,6 +80,7 @@ function CountriesListing() {
   }, []);
 
   const getAllCurrency = async () => {
+    if (!canLoadCurrencies) return;
     await CurrencyService.getActiveCurrencies()
       .then((res) => {
         setCurrencyList([...res.data]);
@@ -87,6 +89,7 @@ function CountriesListing() {
   };
 
   const getAllCountry = async () => {
+    if (!canLoadCountries) return;
     await CountryService.getAllCountry()
       .then((res) => {
         setCountries([...res.data]);
