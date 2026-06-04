@@ -40,6 +40,8 @@ function EntitiesListing() {
   const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.ENTITIES, 'ENTDEL');
   const canView = perms.accessView === "1";
   const canLoadInstitutions = hasApiAccess(ConfigurationActivities.ENTITIES, 'GAAINST');
+  const canSearchEntities = hasApiAccess(ConfigurationActivities.ENTITIES, 'ENTSRCH');
+  const canLoadMcc = hasApiAccess(ConfigurationActivities.ENTITIES, 'MCCGET');
   const [businessTypeList, setBusinessTypeList] = React.useState<
     SystemCodeModel[]
   >([]);
@@ -305,6 +307,7 @@ function EntitiesListing() {
       { label: string; value: string }[]
     >([]);
   const getAllMcc = async () => {
+    if (!canLoadMcc) return;
     setIsLoading(true);
     let option: any = [];
     await MccService.getAllMcc()
@@ -469,6 +472,7 @@ reset({
       setIsSortOrderASC(true);
       model.sort = [{ column: 'ENTITY_NAME', sortOrder: 'ASC' }];
     }
+    if (!canSearchEntities) return;
     EntityService.searchCriteria(model)
       .then((res) => {
         if (res.status === StatusCode.Success) {

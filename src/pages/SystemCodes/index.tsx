@@ -36,6 +36,9 @@ const SystemCodes = () => {
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.SYS_CODES, 'SYSCDDEL');
     const canView = perms.accessView === "1";
     const canLoadInstitutions = hasApiAccess(ConfigurationActivities.SYS_CODES, 'GAAINST');
+    const canLoadSysCodesByInst = hasApiAccess(ConfigurationActivities.SYS_CODES, 'SYSCDINST');
+    const canLoadSysHeaderCodes = hasApiAccess(ConfigurationActivities.SYS_CODES, 'SYSHDRCD');
+    const canLoadAllActiveInstitutions = hasApiAccess(ConfigurationActivities.SYS_CODES, 'INSTALACT');
 
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof SystemCodeModel>('codePrefix');
@@ -51,10 +54,12 @@ const SystemCodes = () => {
         const instID = getLocalStorage(
             LOCALSTORAGE_KEYS.DEFAULT_INSTITUTE
         ) as string;
-        SystemCodeServices.getAllSystemCodesByInstitution(instID).then(res => {
-            setSysCodes([...res.data]);
-            setFilteredList([...res.data])
-        });
+        if (canLoadSysCodesByInst) {
+            SystemCodeServices.getAllSystemCodesByInstitution(instID).then(res => {
+                setSysCodes([...res.data]);
+                setFilteredList([...res.data])
+            });
+        }
         getSystemHeaderPrefix();
     }, []);
 
@@ -69,6 +74,7 @@ const SystemCodes = () => {
     // }, [selectInstitutionVal, sysCodes]);
 
     const getSystemCodes = async () => {
+        if (!canLoadSysCodesByInst) return;
         SystemCodeServices.getAllSystemCodesByInstitution(selectInstitutionVal).then(res => {
             setSysCodes([...res.data]);
             setFilteredList([...res.data])
@@ -76,6 +82,7 @@ const SystemCodes = () => {
     }
 
     const getSystemHeaderPrefix = () => {
+        if (!canLoadSysHeaderCodes) return;
         SystemCodeServices.getAllSystemCodesHeader().then(res => {
             setPrefixList([...res.data]);
         });
@@ -96,11 +103,13 @@ const SystemCodes = () => {
             })
             .catch((err) =>   toast.error(err.response.data.errors[0]));
 
-        await InstitutionService.getAllActiveInstitution()
-            .then((res) => {
-                setSaveInstitution([...res.data]);
-            })
-            .catch((err) =>   toast.error(err.response.data.errors[0]));
+        if (canLoadAllActiveInstitutions) {
+            await InstitutionService.getAllActiveInstitution()
+                .then((res) => {
+                    setSaveInstitution([...res.data]);
+                })
+                .catch((err) =>   toast.error(err.response.data.errors[0]));
+        }
     };
 
     const handleClose = () => {
@@ -135,6 +144,7 @@ const SystemCodes = () => {
 
     const handleInstitutionChange = (event: SelectChangeEvent) => {
         setSelectInstitutionVal(event.target.value);
+        if (!canLoadSysCodesByInst) return;
                 SystemCodeServices.getAllSystemCodesByInstitution(event.target.value).then(res => {
             setSysCodes([...res.data]);
             setFilteredList([...res.data])

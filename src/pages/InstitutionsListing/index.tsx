@@ -38,6 +38,9 @@ function InstitutionsListing() {
   const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.INST, 'SINSTSC');
   const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.INST, 'DINST');
   const canView = perms.accessView === "1";
+  const canLoadAllInstitutions = hasApiAccess(ConfigurationActivities.INST, 'GAINST');
+  const canLoadInstitutionById = hasApiAccess(ConfigurationActivities.INST, 'GINST');
+  const canLoadInstitutionControl = hasApiAccess(ConfigurationActivities.INST, 'GINSTCTRL');
 
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<keyof Institution>('institutionId');
@@ -82,6 +85,7 @@ function InstitutionsListing() {
   }, []);
 
   const getAllInstitute = async () => {
+    if (!canLoadAllInstitutions) return;
     await InstitutionService.getAllInstitution()
       .then((res) => {
         setInstitution([...res.data]);
@@ -129,6 +133,7 @@ function InstitutionsListing() {
   }
   
   const editInstitute = async (id: string) => {
+    if (!canLoadInstitutionControl) return;
     InstitutionControlService.getInstitutionControlByInstitution(id)
       .then((response: { data: any }) => {
         navigate(`/institutions-definition/${id}/${response.data.recordSeqId}`);

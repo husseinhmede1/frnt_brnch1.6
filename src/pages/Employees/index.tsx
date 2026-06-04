@@ -71,6 +71,8 @@ function Employees() {
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.EMPLOYEES, 'EMPDEL');
     const canView = perms.accessView === "1";
     const canLoadInstitutions = hasApiAccess(ConfigurationActivities.EMPLOYEES, 'GAAINST');
+    const canLoadEmployeesByInst = hasApiAccess(ConfigurationActivities.EMPLOYEES, 'EMPINST');
+    const canLoadEmployeeById = hasApiAccess(ConfigurationActivities.EMPLOYEES, 'EMPGET');
 
     const [order, setOrder] = useState<Order>('asc');
     const [orderBy, setOrderBy] = useState<keyof EmployeeModel>('employeeId');
@@ -165,6 +167,7 @@ function Employees() {
     };
 
     const getEmployeesByInstitutionId = async (id: string | "") => {
+        if (!canLoadEmployeesByInst) return;
         await EmployeeService.getEmployeesByInstitutionId(id)
             .then((res) => {
                 setEmployeeList([...res.data]);
@@ -218,6 +221,7 @@ function Employees() {
     };
 
     const getEmployeeById = async (id: number | undefined) => {
+        if (!canLoadEmployeeById) return;
         EmployeeService.getById(Number(id))
             .then((res) => {
                 const data = JSON.parse(JSON.stringify(res.data));

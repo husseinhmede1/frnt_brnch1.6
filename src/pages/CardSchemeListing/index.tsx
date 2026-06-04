@@ -32,12 +32,15 @@ function CardScheme() {
     const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.CARDSCH, 'SCSCHEMESC');
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CARDSCH, 'DCSCHEME');
     const canView = perms.accessView === "1";
+    const canLoadAllCardSchemes = hasApiAccess(ConfigurationActivities.CARDSCH, 'GACSCHEME');
+    const canLoadCardSchemeById = hasApiAccess(ConfigurationActivities.CARDSCH, 'GCSCHEME');
 
     useEffect(() => {
         getAllCardScheme();
     }, []);
 
     const getAllCardScheme = async () => {
+        if (!canLoadAllCardSchemes) return;
         await CardSchemeService.getAllCardScheme()
             .then((res) => {
                 setCardSchemes([...res.data]);

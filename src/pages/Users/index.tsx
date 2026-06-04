@@ -68,6 +68,8 @@ function Users() {
   const canView = perms.accessView === "1";
   const canLoadInstitutions = hasApiAccess(ConfigurationActivities.MNGUSERS, 'GAAINST');
   const canLoadRoles = hasApiAccess(ConfigurationActivities.MNGUSERS, 'GETALLROLES');
+  const canLoadAllUsers = hasApiAccess(ConfigurationActivities.MNGUSERS, 'GETALLUSERS');
+  const canLoadUsersByInst = hasApiAccess(ConfigurationActivities.MNGUSERS, 'GETUSERBYINST');
 
   /* START (sort table data) */
   function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -130,6 +132,7 @@ function Users() {
   };
 
   const getUsersByInst = (id: string) => {
+    if (!canLoadUsersByInst) return;
     const loginUserss = JSON.parse(userStr as string);
     UserService.getUsersByInstitution(id)
       .then((res) => {

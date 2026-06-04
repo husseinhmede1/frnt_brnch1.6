@@ -75,6 +75,7 @@ function TransactionGroupsListing() {
   const canUpdate = perms.accessUpdate === "1";
   const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.TXN_GROUP, 'TXGRPDEL');
   const canView = perms.accessView === "1";
+  const canLoadAllTransactionGroups = hasApiAccess(ConfigurationActivities.TXN_GROUP, 'TXGRPGET');
 
   const {
     register,
@@ -140,6 +141,7 @@ function TransactionGroupsListing() {
   };
 
   const getAllTransactionGroup = async () => {
+    if (!canLoadAllTransactionGroups) return;
     await TransactionGroupService.getAllTransactionGroup()
       .then((res) => {
         setTransactionGroups([...res.data]);

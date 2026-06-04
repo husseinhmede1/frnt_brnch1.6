@@ -106,6 +106,7 @@ function ManualNonActivityFeesListing() {
   const canUpdate = perms.accessUpdate === "1";
   const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MNNONACTFEE, 'DMNATX');
   const canView = perms.accessView === "1";
+  const canSearchNonActivityTransactions = hasApiAccess(ConfigurationActivities.MNNONACTFEE, 'SMNATXSRCH');
 
   const outLetIdRequired = "Entity/OutletId is required.";
   useEffect(() => {
@@ -193,6 +194,7 @@ function ManualNonActivityFeesListing() {
   };
 
   const getValuesBySearch = (model: any) => {
+    if (!canSearchNonActivityTransactions) return;
     ManualNonActivityTransactionServices.getBySearch(model)
       .then((res) => {
         if (res?.status === StatusCode.Success) {

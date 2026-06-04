@@ -51,6 +51,7 @@ function TerminalType() {
     const canUpdate = perms.accessUpdate === "1";
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.TERM_TYPE, 'TRMTPDEL');
     const canView = perms.accessView === "1";
+    const canLoadAllTerminalTypes = hasApiAccess(ConfigurationActivities.TERM_TYPE, 'TRMTPGET');
 
   const {
     register,
@@ -92,6 +93,7 @@ function TerminalType() {
   }, []);
 
   const getAllTerminalType = async () => {
+    if (!canLoadAllTerminalTypes) return;
     await TerminalTypeService.getAll()
       .then((res) => {
         setTerminalTypes([...res.data]);

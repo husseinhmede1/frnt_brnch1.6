@@ -46,6 +46,7 @@ function IssuerProfile() {
     const canUpdate = perms.accessUpdate === "1";
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.ISSPR, 'ISSPRDEL');
     const canLoadInstitutions = hasApiAccess(ConfigurationActivities.ISSPR, 'GAAINST');
+    const canLoadIssuerProfilesByInst = hasApiAccess(ConfigurationActivities.ISSPR, 'ISSPRINST');
 
     const [institution, setInstitution] = useState<Institution[]>([]);
     const [selectInstitutionVal, setSelectInstitutionVal] = useState("");
@@ -104,6 +105,7 @@ function IssuerProfile() {
     };
 
     const getIssuerProfilesByInstitutionId = async (id: string | "") => {
+        if (!canLoadIssuerProfilesByInst) return;
         await IssuerProfileService.getIssuerProfilesByInstitution(id)
             .then((res) => {
                 setIssuers([...res.data]);

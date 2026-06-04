@@ -31,6 +31,7 @@ const Transactions = () => {
     const canDelete = perms.accessDelete === "1";
     const canView = perms.accessView === "1";
     const canLoadInstitutions = hasApiAccess(ConfigurationActivities.TRNINQ, 'GAAINST');
+    const canLoadDefaultTxIds = hasApiAccess(ConfigurationActivities.TRNINQ, 'GDFTXID');
 
     const [usageList, setUsageList] = React.useState<SystemCodeModel[]>([]);
     const [trasUsage, setTransUsage] = React.useState<string>(" ");
@@ -73,6 +74,7 @@ const Transactions = () => {
     }
 
     const getTransactions = () => {
+        if (!canLoadDefaultTxIds) return;
         const instID = getLocalStorage(LOCALSTORAGE_KEYS.DEFAULT_INSTITUTE) as string;
         TransactionService.getInstDefaultTransactionIdByInstitutionId(instID).then(res => {
             setTransactions([...res.data]);

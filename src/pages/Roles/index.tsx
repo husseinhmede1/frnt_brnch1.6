@@ -24,6 +24,7 @@ const Roles = () => {
     const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.MNGROLES, 'ROLECHNGSTTS');
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MNGROLES, 'DELETEROLE');
     const canView = perms.accessView === "1";
+    const canLoadAllRoles = hasApiAccess(ConfigurationActivities.MNGROLES, 'GETALLROLES');
 
     const userStr = getLocalStorage(LOCALSTORAGE_KEYS.USER);
     const userdata = JSON.parse(
@@ -71,6 +72,7 @@ const Roles = () => {
     }, [])
 
     const getRoles = async () => {
+        if (!canLoadAllRoles) return;
         await RoleService.getAllRoles()
             .then((res) => {
                 setRoleList([...res.data]);

@@ -80,6 +80,7 @@ function NonActivityFeesPackagesListing() {
   const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.NONACT_FEE_PKG, 'NACTPKDL');
   const canView = perms.accessView === "1";
   const canLoadInstitutions = hasApiAccess(ConfigurationActivities.NONACT_FEE_PKG, 'GAAINST');
+  const canLoadNonActivityPkgByInst = hasApiAccess(ConfigurationActivities.NONACT_FEE_PKG, 'NACTPKIN');
 
   const [mccList, setMccList] = React.useState<MccModel[]>([]);
   const [selectMcc, setSelectMcc] = React.useState("");
@@ -92,6 +93,7 @@ function NonActivityFeesPackagesListing() {
     React.useState<ActivityFeesPackage[]>([]);
 
   const getNonActivityByInstitutionId = async (id: string) => {
+    if (!canLoadNonActivityPkgByInst) return;
     await NonActivityFeesPackagesService.getNonActivityByInstitutionId(
       id
     )

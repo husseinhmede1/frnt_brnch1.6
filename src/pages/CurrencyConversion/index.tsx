@@ -64,6 +64,8 @@ function CurrencyConversion() {
     const canView = perms.accessView === "1";
     const canLoadInstitutions = hasApiAccess(ConfigurationActivities.CRNCY_CONV, 'GAAINST');
     const canLoadCurrencies = hasApiAccess(ConfigurationActivities.CRNCY_CONV, 'GACURRENCY');
+    const canLoadCurrencyConversionByInst = hasApiAccess(ConfigurationActivities.CRNCY_CONV, 'CVCNINST');
+    const canLoadCurrencyConversionById = hasApiAccess(ConfigurationActivities.CRNCY_CONV, 'CVCNGET');
 
   const handleClickOpen = (isEdited: boolean) => {
     if (!isEdited) {
@@ -126,6 +128,7 @@ function CurrencyConversion() {
 
 
   const getCurrencyConversionByInstitutionId = async (id: string) => {
+    if (!canLoadCurrencyConversionByInst) return;
     await CurrencyConversionService.getCurrencyConversionByInstitutionId(id)
       .then((res) => {
         setcurrencyConversionGrid([...res.data]);
@@ -133,6 +136,7 @@ function CurrencyConversion() {
   }
 
   const editCurrencyConversion = (currencyConversionId: number) => {
+    if (!canLoadCurrencyConversionById) return;
     CurrencyConversionService.getCurrencyConversionById(
       currencyConversionId
     ).then((res) => {

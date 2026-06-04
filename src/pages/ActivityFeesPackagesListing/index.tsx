@@ -84,6 +84,7 @@ function ActivityFeesPackagesListing() {
   const canLoadInstitutions = hasApiAccess(ConfigurationActivities.ACT_FEE_PKG, 'GAAINST');
   const canLoadCurrencies = hasApiAccess(ConfigurationActivities.ACT_FEE_PKG, 'GACURRENCY');
   const canLoadCardSchemes = hasApiAccess(ConfigurationActivities.ACT_FEE_PKG, 'GACSSCHEME');
+  const canLoadActivityPkgByInst = hasApiAccess(ConfigurationActivities.ACT_FEE_PKG, 'ACTPKINST');
 
   const [mccList, setMccList] = React.useState<MccModel[]>([]);
   const [selectMcc, setSelectMcc] = React.useState("");
@@ -139,6 +140,7 @@ function ActivityFeesPackagesListing() {
   };
 
   const getActivityByInstitutionId = async (id: string) => {
+    if (!canLoadActivityPkgByInst) return;
     await ActivityFeesPackagesService.getActivityByInstitutionId(id)
       .then((res) => {
         setActivityFeesPackageList([...res.data]);

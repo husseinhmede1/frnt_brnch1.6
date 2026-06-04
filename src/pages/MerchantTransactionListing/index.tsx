@@ -100,6 +100,8 @@ function MerchantTransactionListing() {
   const canUpdate = perms.accessUpdate === "1";
   const canDelete = perms.accessDelete === "1";
   const canView = perms.accessView === "1";
+  const canSearchMerchantTransactions = hasApiAccess(ConfigurationActivities.MANTRANS, 'SMMTXSRCH');
+  const canLoadTerminals = hasApiAccess(ConfigurationActivities.MANTRANS, 'GTERMINAL');
 
   const [page, setPage] = React.useState(0);
   const [totalRecords, setTotalRecords] = React.useState(0);
@@ -203,6 +205,7 @@ function MerchantTransactionListing() {
   };
 
   const getValuesBySearch = (model: any) => {
+    if (!canSearchMerchantTransactions) return;
     MerchantTransactionServices.getBySearch(model)
       .then((res) => {
         if (res?.status === StatusCode.Success) {
@@ -342,6 +345,7 @@ function MerchantTransactionListing() {
   }, [selectInstitutionVal]);
 
   const getTerminalsByEntityId = (id: string) => {
+    if (!canLoadTerminals) return;
     TerminalService.getAllByEntityId(id)
       .then((res) => {
         setTerminalList(res?.data);

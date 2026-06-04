@@ -82,6 +82,7 @@ function CurrencyRate() {
     const canView = perms.accessView === "1";
     const canLoadInstitutions = hasApiAccess(ConfigurationActivities.CRNCY_RATE, 'GAAINST');
     const canLoadCurrencies = hasApiAccess(ConfigurationActivities.CRNCY_RATE, 'GACURRENCY');
+    const canSearchCurrencyRates = hasApiAccess(ConfigurationActivities.CRNCY_RATE, 'CVRTSRCH');
 
   const firstUpdate = useRef(true);
 
@@ -268,6 +269,7 @@ function CurrencyRate() {
       setCurrentSortColumn("currencyName");
       setIsSortOrderASC(true);
     }
+    if (!canSearchCurrencyRates) return;
     CurrencyRateService.search(instituteId, model)
       .then((res) => {
         if (res.status === StatusCode.Success) {

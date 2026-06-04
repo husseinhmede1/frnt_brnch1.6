@@ -90,6 +90,8 @@ function Mcc() {
   const canView = perms.accessView === "1";
   const canLoadCardSchemes = hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'GACSSCHEME');
   const canLoadSystemCodes = hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'SPRFXSUFX');
+  const canLoadMccById = hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'GMCC');
+  const canSearchMcc = hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'SMCCSRCH');
 
   const handleClickOpen = (isEdit: boolean) => {
     if (!isEdit) {
@@ -188,6 +190,7 @@ function Mcc() {
   };
 
   const getMccById = async (id: number | undefined) => {
+    if (!canLoadMccById) return;
     MccService.getMccById(Number(id))
       .then((res) => {
         const data = JSON.parse(JSON.stringify(res.data));
@@ -408,6 +411,7 @@ function Mcc() {
       mcc: !fromFilterSearch ? filterData?.mcc : values?.mcc ? values.mcc : "",
       merchantTypeId: !fromFilterSearch ? filterData?.merchantTypeId : merchantTypeId ? merchantTypeId : 0,
     };
+    if (!canSearchMcc) return;
     MccService.filterSearch(filtermodel)
       .then((res) => {
         if (res.status === StatusCode.Success) {

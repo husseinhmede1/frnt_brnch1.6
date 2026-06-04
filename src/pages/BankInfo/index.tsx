@@ -55,6 +55,7 @@ function BankInfo() {
     const canUpdate = perms.accessUpdate === "1";
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.BNKCD, 'BNKCDDEL');
     const canLoadInstitutions = hasApiAccess(ConfigurationActivities.BNKCD, 'GAAINST');
+    const canLoadBankInfoByInst = hasApiAccess(ConfigurationActivities.BNKCD, 'BNKCDINS');
 
     const [institution, setInstitution] = useState<Institution[]>([]);
     const [selectInstitutionVal, setSelectInstitutionVal] = useState("");
@@ -170,6 +171,7 @@ function BankInfo() {
     };
 
     const getAllBankInfosByInstitutionId = async (id: string | "") => {
+        if (!canLoadBankInfoByInst) return;
         await BankInfoService.getAllBankInfoByInstitution(id)
             .then((res) => {
                 setBankInfos([...res.data]);
