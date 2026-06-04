@@ -73,9 +73,7 @@ const RoleDefinition = () => {
                 hasScreen: act.activity?.hasScreen as string,
                 instId: act.activity?.instId as number,
                 instName: act.activity?.instName as string,
-                isMenu: act.activity?.isMenu as string,
-                parentActivityDesc: act.activity?.parentActivityDesc as string,
-                parentActivityId: act.activity?.parentActivityId as number
+                isMenu: act.activity?.isMenu as string
             }));
             setAssignprivilege([...privilege]);
         })
@@ -277,7 +275,7 @@ const RoleDefinition = () => {
                                                                         icon={<img src={ic_check} alt="" />}
                                                                         disabled = {isSystemAdminRole}
                                                                         checkedIcon={<img src={ic_checked} alt="" />}
-                                                                        checked={row.accessUpdate === '1' ? true : row.accessView === "1"? true: false}
+                                                                        checked={row.accessView === '1'}
                                                                         onChange={() => changeAssignPrivilege(row.activityId, 'accessView')}
                                                                     />
                                                                 </TableCell>

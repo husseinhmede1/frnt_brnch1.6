@@ -38,8 +38,6 @@ export class Activity {
   instId!: number;
   instName!: string;
   isMenu!: string;
-  parentActivityDesc!: string;
-  parentActivityId!: number;
 }
 export class roleActivities {
   accessAdd?: string;
