@@ -1,4 +1,5 @@
 import { LOCALSTORAGE_KEYS, getLocalStorage } from "./helper";
+import { ActivityPermissionModel } from "../models/configuration/ModuleModel";
 
 export interface ActivityPermissions {
     accessView:    string;
@@ -14,46 +15,42 @@ const DEFAULT: ActivityPermissions = {
 };
 
 /**
- * Look up a user's permissions for a given activity code from the
- * modules tree stored in localStorage after login.
- * Searches all levels: module → subModule → subModule (3 levels deep).
+ * Look up a user's permissions for a given activity code.
+ * Reads from the flat ActivityPermissionModel[] stored in localStorage
+ * after login by /v1/lookup/modules/user.
  */
 export function getActivityPermissions(activityCode: string): ActivityPermissions {
     try {
         const raw = getLocalStorage(LOCALSTORAGE_KEYS.MODULES);
         if (!raw) return DEFAULT;
 
-        const modules: any[] = JSON.parse(raw);
+        const activities: ActivityPermissionModel[] = JSON.parse(raw);
+        const act = activities.find(a => a.activityCode === activityCode);
+        if (!act) return DEFAULT;
 
-        for (const module of modules) {
-            const found = findInModule(module, activityCode);
-            if (found) return toPerms(found);
-        }
+        return {
+            accessView:    act.accessView    ?? "0",
+            accessAdd:     act.accessAdd     ?? "0",
+            accessUpdate:  act.accessUpdate  ?? "0",
+            accessDelete:  act.accessDelete  ?? "0",
+            accessChecker: act.accessChecker ?? "0",
+        };
     } catch {
-        /* localStorage unavailable or corrupt — fail silently */
+        /* localStorage unavailable or corrupt */
     }
     return DEFAULT;
 }
 
-function findInModule(module: any, activityCode: string): any {
-    // direct activities under this module
-    const act = module.activities?.find((a: any) => a.activityCode === activityCode);
-    if (act) return act;
-
-    // recurse into subModules
-    for (const sub of (module.subModule ?? [])) {
-        const found = findInModule(sub, activityCode);
-        if (found) return found;
-    }
-    return null;
-}
-
-function toPerms(act: any): ActivityPermissions {
-    return {
-        accessView:    act.accessView    ?? "0",
-        accessAdd:     act.accessAdd     ?? "0",
-        accessUpdate:  act.accessUpdate  ?? "0",
-        accessDelete:  act.accessDelete  ?? "0",
-        accessChecker: act.accessChecker ?? "0",
-    };
+/**
+ * Returns all activities where accessView = "1" — used by the Sidebar
+ * to decide which menu items to show.
+ */
+export function getViewableActivities(): ActivityPermissionModel[] {
+    try {
+        const raw = getLocalStorage(LOCALSTORAGE_KEYS.MODULES);
+        if (!raw) return [];
+        const activities: ActivityPermissionModel[] = JSON.parse(raw);
+        return activities.filter(a => a.accessView === "1" && a.isMenu === "1");
+    } catch {}
+    return [];
 }

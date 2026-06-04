@@ -61,32 +61,36 @@ export const ConfigurationActivities = {
   MY_ACCOUNT: "MY_ACCT",
   ABOUT: "ABOUT",
   CUJ_MNG: "CUJ_MNG",
-  APPRV_ENT: "APPRV_ENT",
-  MAKER_CHECKER: "MAKER_CHECKER",
-  CARDSCH: "CARDSCH",
-  CITY: "CITY",
-  CNTRY: "CNTRY",
-  CURNCY: "CURNCY",
-  MCC_SCREEN: "MCC",
-  INST: "INST",
-  BLKD_IP: "Blocked IP",
-  MNGUSERS: "MNGUSERS",
-  MNGROLES: "MNGROLES",
-  FILES_SCREEN: "FILES",
-  LAYOUT_SCREEN: "LAYOUT",
-  MANTRANS: "MANTRANS",
-  MNNONACTFEE: "MNNONACTFEE",
-  TRNINQ: "TRNINQ",
-  NONACFEEINQ: "NONACFEEINQ",
-  ACT_FEE_PKG: "ACT_FEE_PKG",
-  CRNCY_CONV: "CRNCY_CONV",
-  CRNCY_RATE: "CRNCY_RATE",
-  EMPLOYEES: "EMPLOYEES",
-  ENTITIES: "ENTITIES",
-  NONACT_FEE_PKG: "NONACT_FEE_PKG",
-  SYS_CODES: "SYS_CODES",
-  TERM_TYPE: "TERM_TYPE",
-  TXN_GROUP: "TXN_GROUP",
+  // ── Confirmed DB activity codes ──────────────────────────────────
+  APPRV_ENT:     "APPRV_ENT",      // Pending Activities / ApprovingEntities (35)
+  MAKER_CHECKER: "MAKER_CHECKER",  // Maker Checker Configuration (46)
+  CURNCY:        "CURNCY",         // Currency Screen (55)
+  BLKD_IP:       "Blocked IP",     // Blocked IP (58)
+  CNTRY:         "CNTRY",          // Country Screen (95/110)
+  CITY:          "CITY",           // City Screen (96/111)
+  MCC_SCREEN:    "MCC",            // MCC Screen (97/112)
+  CARDSCH:       "CARDSCH",        // Card Scheme Screen (98/113)
+  INST:          "INST",           // Institution Screen (99/114)
+  TRNINQ:        "TRNINQ",         // Transaction Inquiry (100/115)
+  MANTRANS:      "MANTRANS",       // Manual Transaction (101/116)
+  MNNONACTFEE:   "MNNONACTFEE",    // Manual Non Activity Fee (102/117)
+  NONACFEEINQ:   "NONACFEEINQ",    // Non Activity Fee Inquiry (103/118)
+  MNGUSERS:      "MNGUSERS",       // User Screen (104/119)
+  MNGROLES:      "MNGROLES",       // Roles Screen (105/120)
+  SYS_CODES:     "SYSCD",          // System Codes (121)
+  CRNCY_CONV:    "CVCN",           // Currency Conversion (122)
+  CRNCY_RATE:    "CVRT",           // Currency Rate (123)
+  BNKCD:         "BNKCD",          // Banks (124)
+  ISSPR:         "ISSPR",          // Issuer Profile (125)
+  DFTX:          "DFTX",           // Transactions Definition (126)
+  TXN_GROUP:     "TXGRP",          // Transaction Group (127)
+  TERM_TYPE:     "TRMTP",          // Terminal Type (128)
+  EMPLOYEES:     "EMP",            // Employees (129)
+  ENTITIES:      "ENT",            // Entities (130)
+  ACT_FEE_PKG:   "ACTPK",          // Activity Fees Packages (131)
+  NONACT_FEE_PKG:"NACTPK",         // Non-Activity Fees Packages (132)
+  FILES_SCREEN:  "FILES",          // Files (43)
+  LAYOUT_SCREEN: "LAYOUT",         // Layout (42)
 };
 
 export const StatusCode = {

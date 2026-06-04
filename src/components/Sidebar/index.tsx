@@ -19,7 +19,7 @@ import {
 import { useLocation, useNavigate } from "react-router";
 import { useIntl } from "react-intl";
 import { ConfigurationActivities } from "../../utils/constant";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, getViewableActivities } from "../../utils/permissionUtils";
 
 function Sidebar() {
   const { pathname } = useLocation();
