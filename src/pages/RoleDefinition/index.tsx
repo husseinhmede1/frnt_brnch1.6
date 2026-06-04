@@ -10,7 +10,7 @@ import { Activity, ActivityAPI, RoleMainModel, RoleModel } from '../../models/se
 import { ActivityService, RoleService } from '../../services/security/role-service';
 import { allowAlphaNumeric, allowOnlyCharacters } from '../../utils/commonfunction';
 import { ConfigurationActivities, StatusCode } from '../../utils/constant';
-import { getActivityPermissions } from '../../utils/permissionUtils';
+import { getActivityPermissions, hasApiAccess } from '../../utils/permissionUtils';
 import validations from '../../utils/validations';
 
 const RoleDefinition = () => {
@@ -18,9 +18,9 @@ const RoleDefinition = () => {
     const intl = useIntl();
     const navigate = useNavigate();
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNGROLES), []);
-    const canAdd = perms.accessAdd === "1";
-    const canUpdate = perms.accessUpdate === "1";
-    const canDelete = perms.accessDelete === "1";
+    const canAdd    = perms.accessAdd    === "1" && hasApiAccess(ConfigurationActivities.MNGROLES, 'SAVEROLE');
+    const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.MNGROLES, 'SAVEROLE');
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MNGROLES, 'DELETEROLE');
     const canView = perms.accessView === "1";
 
     const [enabled, setEnabled] = useState<boolean>(true);

@@ -43,9 +43,19 @@ import { useForm } from "react-hook-form";
 import validations from "../../utils/validations";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { visuallyHidden } from "@mui/utils";
+import { useMemo } from "react";
+import { ConfigurationActivities } from "../../utils/constant";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 
 function BankInfo() {
     const intl = useIntl();
+
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.BNKCD), []);
+    const canAdd    = perms.accessAdd    === "1" && hasApiAccess(ConfigurationActivities.BNKCD, 'BNKCDCRT');
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.BNKCD, 'BNKCDDEL');
+    const canLoadInstitutions = hasApiAccess(ConfigurationActivities.BNKCD, 'GAAINST');
+
     const [institution, setInstitution] = useState<Institution[]>([]);
     const [selectInstitutionVal, setSelectInstitutionVal] = useState("");
     const [institutions, setInstitutions] = useState<Institution[]>([]);
@@ -302,16 +312,16 @@ function BankInfo() {
     }
 
     useEffect(() => {
-        InstitutionService.getActiveInstitution()
-            .then((response: { data: any }) => {
-                setInstitutions(response.data);
-            })
-            .catch((error: any) => {
-                console.log(error);
-            });
-
+        if (canLoadInstitutions) {
+            InstitutionService.getActiveInstitution()
+                .then((response: { data: any }) => {
+                    setInstitutions(response.data);
+                })
+                .catch((error: any) => {
+                    console.log(error);
+                });
+        }
         setInstitutefromLocalStorage();
-
     }, []);
     return (
         <>
@@ -342,6 +352,7 @@ function BankInfo() {
                                     className="btn-light"
                                     endIcon={<img src={add_rounded} alt="add" />}
                                     onClick={() => handleClickOpen(false)}
+                                    disabled={!canAdd}
                                 >
                                     <FormattedMessage
                                         id="BankInfo.addBtn"
@@ -455,12 +466,14 @@ function BankInfo() {
                                                     <IconButton
                                                         className="border-icon-btn no-border sm"
                                                         onClick={() => editBankInfo(row.bankCodeId)}
+                                                        disabled={!canUpdate}
                                                     >
                                                         <img src={edit_ic} alt="mail" />
                                                     </IconButton>
                                                     <IconButton
                                                         className="border-icon-btn no-border sm"
                                                         onClick={() => onDelete(row.bankCodeId)}
+                                                        disabled={!canDelete}
                                                     >
                                                         <img src={delete_ic} alt="mail" />
                                                     </IconButton>

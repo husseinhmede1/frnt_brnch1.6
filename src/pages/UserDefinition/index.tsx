@@ -32,7 +32,7 @@ import { GetUserById, RoleInst, UserMainModel, UserModel } from "../../models/se
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { SystemCodeServices } from "../../services/entityManagement/system-code-services";
 import { AssignRoles, InstitutionList, selectedInst, userStr } from "../../services/request";
-import { getActivityPermissions } from "../../utils/permissionUtils";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { RoleService } from "../../services/security/role-service";
 import { UserService } from "../../services/security/user-service";
 import { allowOnlyCharacters, allowOnlyNumbers, avoidSpace } from "../../utils/commonfunction";
@@ -70,9 +70,9 @@ function UserDefinition() {
   const [prefLanguage, setPrefLanguage] = React.useState<SystemCodeModel[]>([]);
   const [prefSystemCodeId, setSystemCodeId] = React.useState<number | null>(null);
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MNGUSERS), []);
-  const canAdd = perms.accessAdd === "1";
-  const canUpdate = perms.accessUpdate === "1";
-  const canDelete = perms.accessDelete === "1";
+  const canAdd    = perms.accessAdd    === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'SAVEUSER');
+  const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'SAVEUSER');
+  const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'DELETEUSER');
   const canView = perms.accessView === "1";
 
   const [loginUser, setLoginUser] = React.useState<any>();

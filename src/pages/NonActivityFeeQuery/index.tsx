@@ -46,6 +46,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import validations from "../../utils/validations";
 import { TransactionGroupService } from "../../services/configuration/transaction-group-service";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
+import { ConfigurationActivities } from "../../utils/constant";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 import { InstitutionService } from "../../services/configuration/institution-service";
 import { TransactionUsageModel } from "../../models/configuration/TransactionGroupModel";
 import { EntityService } from "../../services/entityManagement/entity-service";
@@ -61,6 +63,9 @@ import { SystemCodeServices } from "../../services/entityManagement/system-code-
 function NonActivityFeeQuery() {
   const navigate = useNavigate();
   const intl = useIntl();
+
+  const perms = React.useMemo(() => getActivityPermissions(ConfigurationActivities.NONACFEEINQ), []);
+  const canSearch = perms.accessView === "1" && hasApiAccess(ConfigurationActivities.NONACFEEINQ, 'SNAFQSRCH');
   const [selectInstitutionVal, setSelectInstitutionVal] = React.useState("");
   const [entityDesc, setEntityDesc] = React.useState("");
   const [entityList, setEntityList] = React.useState<
@@ -651,6 +656,7 @@ function NonActivityFeeQuery() {
                   disableElevation
                   variant="contained"
                   type="submit"
+                  disabled={!canSearch}
                   onClick={() => {
                     console.log("errors", errors);
                   }}

@@ -34,9 +34,19 @@ import { Errors, StatusCode } from "../../utils/constant";
 import { toast } from "react-toastify";
 import { getLocalStorage, LOCALSTORAGE_KEYS } from "../../utils/helper";
 import { visuallyHidden } from "@mui/utils";
+import { useMemo } from "react";
+import { ConfigurationActivities } from "../../utils/constant";
+import { getActivityPermissions, hasApiAccess } from "../../utils/permissionUtils";
 
 function IssuerProfile() {
     const intl = useIntl();
+
+    const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.ISSPR), []);
+    const canAdd    = perms.accessAdd    === "1" && hasApiAccess(ConfigurationActivities.ISSPR, 'ISSPRCRT');
+    const canUpdate = perms.accessUpdate === "1";
+    const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.ISSPR, 'ISSPRDEL');
+    const canLoadInstitutions = hasApiAccess(ConfigurationActivities.ISSPR, 'GAAINST');
+
     const [institution, setInstitution] = useState<Institution[]>([]);
     const [selectInstitutionVal, setSelectInstitutionVal] = useState("");
     const [institutions, setInstitutions] = useState<Institution[]>([]);
@@ -181,13 +191,15 @@ function IssuerProfile() {
     };
 
     useEffect(() => {
-        InstitutionService.getActiveInstitution()
-            .then((response: { data: any }) => {
-                setInstitutions(response.data);
-            })
-            .catch((error: any) => {
-                console.log(error);
-            });
+        if (canLoadInstitutions) {
+            InstitutionService.getActiveInstitution()
+                .then((response: { data: any }) => {
+                    setInstitutions(response.data);
+                })
+                .catch((error: any) => {
+                    console.log(error);
+                });
+        }
         setInstitutefromLocalStorage();
     }, []);
     return (
@@ -218,6 +230,7 @@ function IssuerProfile() {
                                 className="btn-light"
                                 endIcon={<img src={add_rounded} alt="add" />}
                                 onClick={() => navigate(`/issuer-relation/${selectInstitutionVal}`)}
+                                disabled={!canAdd}
                             >
                                 <FormattedMessage
                                     id="IssuerProfile.addBtn"
@@ -318,12 +331,14 @@ function IssuerProfile() {
                                                 <IconButton
                                                     className="border-icon-btn no-border sm"
                                                     onClick={() => editIssuerProfile(row.profileId, row.issuerAcqProfile)}
+                                                    disabled={!canUpdate}
                                                 >
                                                     <img src={edit_ic} alt="mail" />
                                                 </IconButton>
                                                 <IconButton
                                                     className="border-icon-btn no-border sm"
                                                     onClick={() => onDelete(row.profileId)}
+                                                    disabled={!canDelete}
                                                 >
                                                     <img src={delete_ic} alt="mail" />
                                                 </IconButton>
