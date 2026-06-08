@@ -326,7 +326,7 @@ function StyledDatePicker({
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
-const STATUSES = ["PENDING", "PROCESSING", "APPROVED", "DECLINED"];
+const STATUSES = [""];
 
 function PendingActivities() {
   const intl = useIntl();
@@ -559,8 +559,8 @@ function PendingActivities() {
         </h2>
         <p style={styles.pageSubtitle}>
           <FormattedMessage
-            id="PendingActivity.subtitle"
-            defaultMessage="Review and manage activities awaiting approval"
+            id="PendingActivity.ManageyourPendingActivities"
+            defaultMessage="Manage your Pending Activities"
           />
         </p>
       </div>

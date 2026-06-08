@@ -64,7 +64,8 @@ function CountriesListing() {
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CNTRY), []);
     const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'SCOUNTRY');
-    const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'SCOUNTRYSC');
+    const canSwitch = hasApiAccess(ConfigurationActivities.CNTRY, 'SCOUNTRYSC');
+    const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'SCOUNTRY');
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CNTRY, 'DCOUNTRY');
     const canView = perms.accessView === "1";
     const canLoadCountries  = hasApiAccess(ConfigurationActivities.CNTRY, 'GACOUNTRY');
@@ -343,7 +344,7 @@ function CountriesListing() {
                                     onChange={(e) =>
                                       changeStatus(row.cntryId, e)
                                     }
-                                    disabled={!canUpdate}
+                                    disabled={!canSwitch}
                                   />
                                   <IconButton
                                     className="border-icon-btn no-border sm"

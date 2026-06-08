@@ -53,6 +53,7 @@ export function getActivityPermissions(activityCode: string): ActivityPermission
 export function hasApiAccess(activityCode: string, apiCode: string): boolean {
     try {
         const raw = getLocalStorage(LOCALSTORAGE_KEYS.MODULES);
+        
         if (!raw) return false;
         const activities: ActivityPermissionModel[] = JSON.parse(raw);
         const act = activities.find(a => a.activityCode === activityCode);

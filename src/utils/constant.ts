@@ -62,35 +62,35 @@ export const ConfigurationActivities = {
   ABOUT: "ABOUT",
   CUJ_MNG: "CUJ_MNG",
   // ── Confirmed DB activity codes ──────────────────────────────────
-  APPRV_ENT:     "APPRV_ENT",      // Pending Activities / ApprovingEntities (35)
-  MAKER_CHECKER: "MAKER_CHECKER",  // Maker Checker Configuration (46)
-  CURNCY:        "CURNCY",         // Currency Screen (55)
-  BLKD_IP:       "Blocked IP",     // Blocked IP (58)
-  CNTRY:         "CNTRY",          // Country Screen (95/110)
-  CITY:          "CITY",           // City Screen (96/111)
-  MCC_SCREEN:    "MCC",            // MCC Screen (97/112)
-  CARDSCH:       "CARDSCH",        // Card Scheme Screen (98/113)
-  INST:          "INST",           // Institution Screen (99/114)
-  TRNINQ:        "TRNINQ",         // Transaction Inquiry (100/115)
-  MANTRANS:      "MANTRANS",       // Manual Transaction (101/116)
-  MNNONACTFEE:   "MNNONACTFEE",    // Manual Non Activity Fee (102/117)
-  NONACFEEINQ:   "NONACFEEINQ",    // Non Activity Fee Inquiry (103/118)
-  MNGUSERS:      "MNGUSERS",       // User Screen (104/119)
-  MNGROLES:      "MNGROLES",       // Roles Screen (105/120)
-  SYS_CODES:     "SYSCD",          // System Codes (121)
-  CRNCY_CONV:    "CVCN",           // Currency Conversion (122)
-  CRNCY_RATE:    "CVRT",           // Currency Rate (123)
-  BNKCD:         "BNKCD",          // Banks (124)
-  ISSPR:         "ISSPR",          // Issuer Profile (125)
-  DFTX:          "DFTX",           // Transactions Definition (126)
-  TXN_GROUP:     "TXGRP",          // Transaction Group (127)
-  TERM_TYPE:     "TRMTP",          // Terminal Type (128)
-  EMPLOYEES:     "EMP",            // Employees (129)
-  ENTITIES:      "ENT",            // Entities (130)
-  ACT_FEE_PKG:   "ACTPK",          // Activity Fees Packages (131)
-  NONACT_FEE_PKG:"NACTPK",         // Non-Activity Fees Packages (132)
-  FILES_SCREEN:  "FILES",          // Files (43)
-  LAYOUT_SCREEN: "LAYOUT",         // Layout (42)
+  APPRV_ENT:     "APPRV_ENT",
+  MAKER_CHECKER: "MAKER_CHECKER",
+  CURNCY:        "CURNCY",
+  BLKD_IP:       "Blocked IP",
+  CNTRY:         "CNTRY",
+  CITY:          "CITY",
+  MCC_SCREEN:    "MCC",
+  CARDSCH:       "CARDSCH",
+  INST:          "INST",
+  TRNINQ:        "TRNINQ",
+  MANTRANS:      "MANTRANS",
+  MNNONACTFEE:   "MNNONACTFEE",
+  NONACFEEINQ:   "NONACFEEINQ",
+  MNGUSERS:      "MNGUSERS",
+  MNGROLES:      "MNGROLES",
+  SYS_CODES:     "SYSCD",
+  CRNCY_CONV:    "CVCN",
+  CRNCY_RATE:    "CVRT",
+  BNKCD:         "BNKCD",
+  ISSPR:         "ISSPR",
+  DFTX:          "DFTX",
+  TXN_GROUP:     "TXGRP",
+  TERM_TYPE:     "TRMTP",
+  EMPLOYEES:     "EMP",
+  ENTITIES:      "ENT",
+  ACT_FEE_PKG:   "ACTPK",
+  NONACT_FEE_PKG:"NACTPK",
+  FILES_SCREEN:  "FILES",
+  LAYOUT_SCREEN: "LAYOUT",
 };
 
 export const StatusCode = {

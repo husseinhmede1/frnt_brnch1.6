@@ -69,7 +69,7 @@ function CitiesListing() {
 
     const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.CITY), []);
     const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.CITY, 'SCITY');
-    const canUpdate = perms.accessUpdate === "1";
+    const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.CITY, 'SCITY');
     const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.CITY, 'DCITY');
     const canView = perms.accessView === "1";
     const canLoadCountries  = hasApiAccess(ConfigurationActivities.CITY, 'GACOENTRY');

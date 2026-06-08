@@ -73,6 +73,7 @@ function UserDefinition() {
   const canAdd    = perms.accessAdd    === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'SAVEUSER');
   const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'SAVEUSER');
   const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'DELETEUSER');
+  const canSave = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.MNGUSERS, 'SVU');
   const canView = perms.accessView === "1";
 
   const [loginUser, setLoginUser] = React.useState<any>();
@@ -638,49 +639,43 @@ function UserDefinition() {
                           </TableHead>
                           <TableBody>
                             {assignRoles.map((row, i) => (
-                              pathname.startsWith('/user-profile') || id !== undefined ?
                                 <TableRow key={i} >
                                   <TableCell>{row.institutionName}</TableCell>
                                   <TableCell className='role-cell'>
                                     <Checkbox
-                                      icon={(
-                                          pathname.startsWith('/user-profile') ?
-                                            !(
-                                              canUpdate &&
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
-                                            ) :
-                                            (
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "0"
-                                            )) ?
+                                      icon={
                                         <CheckBoxOutlineBlankIcon />
-                                        : <img src={ic_check} alt="" />}
-                                      checkedIcon={(
-                                          pathname.startsWith('/user-profile') ?
-                                            !(
-                                              canUpdate &&
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
-                                            ) :
-                                            (
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "0"
-                                            )) ?
+                                        // : <img src={ic_check} alt="" />
+                                      }
+                                      checkedIcon={
+                                        // (
+                                        //   pathname.startsWith('/user-profile') ?
+                                        //     !(
+                                        //       canUpdate &&
+                                        //       loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
+                                        //     ) :
+                                        //     (
+                                        //       loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "0"
+                                        //     )) ?
                                         <CheckBoxIcon />
-                                        :
-                                        <img src={ic_checked} alt="" />}
+                                        // :
+                                        // <img src={ic_checked} alt="" />
+                                      }
                                       checked={row.status ?? false}
                                       onChange={(e) => handleChangeAction(e, row.institutionId)}
                                       className={`${isUserProfile?'darker':''}`}
-                                      disabled={(
-                                          isUserProfile ||(
-                                          pathname.startsWith('/user-profile') ?
-                                            !(
-                                              canUpdate &&
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
-                                            ) :
-                                            (
-                                              // loginUser?.user.userRoles.find((role: any) => role.roleName === SystemAdmin.ROLE_NAME &&
-                                              //   role.instName === row.institutionName) !== undefined
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "0"
-                                            )))}
+                                      // disabled={(
+                                      //     isUserProfile ||(
+                                      //     pathname.startsWith('/user-profile') ?
+                                      //       !(
+                                      //         canUpdate &&
+                                      //         loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
+                                      //       ) :
+                                      //       (
+                                      //         // loginUser?.user.userRoles.find((role: any) => role.roleName === SystemAdmin.ROLE_NAME &&
+                                      //         //   role.instName === row.institutionName) !== undefined
+                                      //         loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "0"
+                                      //       )))}
                                     />
                                   </TableCell>
                                   <TableCell className="last-column-border">
@@ -692,102 +687,20 @@ function UserDefinition() {
                                         inputProps={{ "aria-label": "Without label" }}
                                         IconComponent={ArrowDown}
                                         fullWidth
-                                        disabled={(
-                                          isUserProfile || (
-                                            pathname.startsWith('/user-profile') ?
-                                              !(
-                                                canUpdate &&
-                                                loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
-                                              ) :
-                                              (
-                                                // loginUser?.user.userRoles.find((role: any) => role.roleName === SystemAdmin.ROLE_NAME &&
-                                                //   role.instName === row.institutionName) !== undefined
-                                                // loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName) && 
-                                                // loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions) &&
-                                                loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "0"
-                                          )))}
-                                      >
-                                        <MenuItem value=" ">
-                                          <em>
-                                            {intl.formatMessage({
-                                              id: "Users.selectrole",
-                                              defaultMessage: "Select Role",
-                                            })}
-                                          </em>
-                                        </MenuItem>
-                                        {roleList.map(role => (
-                                          <MenuItem value={role.roleId}>{role.roleName}</MenuItem>
-                                        ))}
-                                      </Select>
-                                    </FormControl>
-                                  </TableCell>
-                                </TableRow>
-                                :
-                                loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1" &&
-                                <TableRow key={i}>
-                                  <TableCell>{row.institutionName}</TableCell>
-                                  <TableCell className='role-cell'>
-                                    <Checkbox
-                                      icon={(
-                                          pathname.startsWith('/user-profile') ?
-                                            !(
-                                              canUpdate &&
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "1"
-                                            ) :
-                                            (
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "0"
-                                            )) ?
-                                        <CheckBoxOutlineBlankIcon />
-                                        : <img src={ic_check} alt="" />}
-                                      checkedIcon={(
-                                          pathname.startsWith('/user-profile') ?
-                                            !(
-                                              canUpdate &&
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "1"
-                                            ) :
-                                            (
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "0"
-                                            )) ?
-                                        <CheckBoxIcon />
-                                        :
-                                        <img src={ic_checked} alt="" />}
-                                      checked={row.status ?? false}
-                                      onChange={(e) => handleChangeAction(e, row.institutionId)}
-                                      disabled={(
-                                          pathname.startsWith('/user-profile') ?
-                                            !(
-                                              canUpdate &&
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "1"
-                                            ) :
-                                            (
-                                              // loginUser?.user.userRoles.find((role: any) => role.roleName === SystemAdmin.ROLE_NAME &&
-                                              //   role.instName === row.institutionName) !== undefined
-                                              loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "0"
-                                            ))}
-                                    />
-                                  </TableCell>
-                                  <TableCell className="last-column-border">
-                                    <FormControl fullWidth>
-                                      <Select
-                                        value={row.roleId ? row.roleId.toString() : selectRole}
-                                        onChange={(e) => handleChangeRole(e, row.institutionId)}
-                                        displayEmpty
-                                        inputProps={{ "aria-label": "Without label" }}
-                                        IconComponent={ArrowDown}
-                                        fullWidth
-                                        disabled={(
-                                            pathname.startsWith('/user-profile') ?
-                                              !(
-                                                canUpdate &&
-                                                loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "1"
-                                              ) :
-                                              (
-                                                // loginUser?.user.userRoles.find((role: any) => role.roleName === SystemAdmin.ROLE_NAME &&
-                                                //   role.instName === row.institutionName) !== undefined
-                                                // loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName) && 
-                                                // loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions) &&
-                                                loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions).accessUpdate === "0"
-                                              ))}
+                                        // disabled={(
+                                        //   isUserProfile || (
+                                        //     pathname.startsWith('/user-profile') ?
+                                        //       !(
+                                        //         canUpdate &&
+                                        //         loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "1"
+                                        //       ) :
+                                        //       (
+                                        //         // loginUser?.user.userRoles.find((role: any) => role.roleName === SystemAdmin.ROLE_NAME &&
+                                        //         //   role.instName === row.institutionName) !== undefined
+                                        //         // loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName) && 
+                                        //         // loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions) &&
+                                        //         loginUser?.user.userRoles.find((role: any) => role.instName === row.institutionName)?.roleActivities.find((act: any) => act.activity?.activityDesc === ROLE_ACTIVITY.Institutions)?.accessUpdate === "0"
+                                        //   )))}
                                       >
                                         <MenuItem value=" ">
                                           <em>
@@ -824,7 +737,7 @@ function UserDefinition() {
                     defaultMessage="Cancel"
                   />
                 </Button>
-                <Button type="submit" disableElevation variant="contained" disabled={isUserProfile || isSubmitting} >
+                <Button type="submit" disableElevation variant="contained" disabled={!canSave || isUserProfile || isSubmitting} >
                   <FormattedMessage
                     id="Institution.save"
                     defaultMessage="Save"

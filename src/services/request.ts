@@ -84,7 +84,7 @@ request.interceptors.response.use(
         //These conditions means , page level catch are kept so 500 should not be thrown for these handled errors
 
         if (error?.response?.status === 401 && error.config.url !== '/authenticate') {
-            window.location.href = "/";
+            // window.location.href = "/";
         }
 
         // if (

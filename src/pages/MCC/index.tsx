@@ -85,8 +85,9 @@ function Mcc() {
 
   const perms = useMemo(() => getActivityPermissions(ConfigurationActivities.MCC_SCREEN), []);
   const canAdd = perms.accessAdd === "1" && hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'SMCC');
-  const canUpdate = perms.accessUpdate === "1";
+  const canUpdate = perms.accessUpdate === "1" && hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'SMCC');;
   const canDelete = perms.accessDelete === "1" && hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'DMCC');
+  const canSearch = perms.accessView === "1" && hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'SMCCSRCH');
   const canView = perms.accessView === "1";
   const canLoadCardSchemes = hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'GACSSCHEME');
   const canLoadSystemCodes = hasApiAccess(ConfigurationActivities.MCC_SCREEN, 'SPRFXSUFX');
@@ -619,7 +620,7 @@ function Mcc() {
                 </Grid>
               </div>
               <div className="btns-block right has-border form-group">
-                <Button disableElevation variant="contained" type="submit">
+                <Button disableElevation disabled={!canSearch} variant="contained" type="submit">
                   {intl.formatMessage({
                     id: "Entity.button.search",
                     defaultMessage: "Search",
